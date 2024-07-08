@@ -1,7 +1,7 @@
 % Bingchen Liu modified
 % Note: commented out CBathy part
 clear
-addpath(genpath('/Users/bingchenliu/Desktop/Oceanography/research/Remote_sensing'))
+addpath(genpath('/Users/bingchenliu/Desktop/Oceanography/research/Remote_sensing_total'))
 addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing/Rectification'))
 
 %% ARGUS_automated_rectification toolbox
