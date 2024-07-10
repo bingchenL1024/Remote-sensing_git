@@ -1,7 +1,8 @@
 % Bingchen Liu modified
 % Note: commented out CBathy part
 clear
-addpath(genpath('/Users/bingchenliu/Desktop/Oceanography/research/Remote_sensing'))
+addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing'))
+addpath(genpath('/Users/bingchenliu/Desktop/Oceanography/research/Remote_sensing_total'))
 addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing/Rectification'))
 
 %% ARGUS_automated_rectification toolbox
@@ -276,7 +277,7 @@ clear answer
 %                             extrinsics, intrinsics, initial frame, input data, products
 %  ============================================================================
 [Products.tide]=deal(0);
-cc=1 %BL: why only cc=1, since below there is if cc == 2
+cc=1 %BL: why only cc=1, since below there is if cc == 2, potential bug 
 
 [xyz,~,~,~,~,~] = getCoords(Products(1));
 [y2,x2, ~] = ll_to_utm(Products(1).lat, Products(1).lon);
