@@ -1,4 +1,7 @@
-% Bingchen Liu modified
+% Bingchen Liu modified Austin email code
+% 1.add new path
+% 2.comment out xtranscts and y transcts part 
+% 3.comment out cbathy part 
 % Note: commented out CBathy part
 clear
 addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing'))
@@ -140,7 +143,7 @@ day_files(contains({day_files.name}, 'Processed_data'))=[];day_files(contains({d
 if ~exist(fullfile(data_dir, 'Processed_data'), 'dir')
     mkdir(fullfile(data_dir, 'Processed_data'))
 end %  if ~exist(fullfile(data_dir, 'Processed_data'), 'dir')
-%%
+%% Comment if reprocessing
 processed_files = dir(fullfile(data_dir, 'Processed_data')); processed_files([processed_files.isdir] == 1)=[];
 processed_files(~contains({processed_files.name}, 'Products'))=[];
 % if file already processed - don't reprocess
@@ -193,7 +196,7 @@ switch input_answer
         load(fullfile(temp_file_path, temp_file)); clear temp_file*
 
         [world_camera] = select_target_gcp;
-        for cc = 1:2 %BL: two cameras' calibration 
+        for cc = 1:2
             clear image_fig image_gcp world_gcp worldPose
             eval([strcat('R(cc).cameraParams = cameraParams_CAM', string(cc), ';')])
 
@@ -277,20 +280,20 @@ clear answer
 %                             extrinsics, intrinsics, initial frame, input data, products
 %  ============================================================================
 [Products.tide]=deal(0);
-cc=1 %BL: why only cc=1, since below there is if cc == 2, potential bug 
+cc=1
 
 [xyz,~,~,~,~,~] = getCoords(Products(1));
 [y2,x2, ~] = ll_to_utm(Products(1).lat, Products(1).lon);
 
-% aa=xyz-[x2 y2 0];
-% id_origin=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2])));
-% iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
-% iP_origin = iP(id_origin);
+%aa=xyz-[x2 y2 0];
+%id_origin=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2])));
+%iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
+%iP_origin = iP(id_origin);
 clear aa iP
 
 aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
 
-if cc == 1 % BL: deal with sky? (potentially )
+if cc == 1
     id=[];
     % behind camera 
     for ii = 1:length(aa)
@@ -338,6 +341,7 @@ ylim([0 size(R(cc).I,1)])
 legend('Grid', 'Origin')
 set(gca, 'FontSize', 20)
 
+%%
 % for cc = 1:2
 %     clear Products_x
 % 
@@ -345,7 +349,7 @@ set(gca, 'FontSize', 20)
 %     set(legend, 'Location', 'eastoutside')
 %     pause(1)
 % end
-%%
+%% 
 % for cc = 1:2
 %     plot_ytransects(Products, R(cc).I, R(cc).cameraParams.Intrinsics, R(cc).worldPose)
 %     set(legend, 'Location', 'eastoutside')
@@ -355,15 +359,15 @@ set(gca, 'FontSize', 20)
 %                           GET ARGUS RECTIFIED PRODUCTS
 %  =====================================================================
 close all
-%for dd = 1:length(day_files) original
-for dd = 1%:length(day_files) BL modified for testing 
+
+for dd = 1%:length(day_files)
     tic
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
     time=datetime(str2num(day_files(dd).name)/1000, 'ConvertFrom', 'epochtime');
     [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
     [Products.t] = deal(time);
     [Products.tide]=deal(mean(verified));
-for cc = 1:2
+for cc = 1%:2
     if isfield(Products, 'iP')
     Products = rmfield(Products, 'iP');
     end
@@ -458,10 +462,11 @@ end
     end % for cc = 1 : 2 % Cam 1 or 2
     Products = rmfield(Products, 'iP');
 end % for dd = 1:length(day_files)
-%% ====================================================================
-%                           GET cBATHY
-%  =====================================================================
 
+ %% ====================================================================
+% %                           GET cBATHY
+% %  =====================================================================
+% 
 % close all
 % for  dd = 1 : length(day_files)
 %     clearvars -except dd *_dir user_email day_files

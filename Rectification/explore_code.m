@@ -1,4 +1,4 @@
-%load('/Volumes/SIO_CPG_8T/Fletcher/Processed_data/ARGUS2_Cam1_1702144862060_Products.mat')
+%load('/Volumes/SIO_CPG_8T/Fletcher/raw_data/Processed_data/ARGUS2_Cam1_1702144862060_Products.mat')
 image= Products.Irgb_2d;
 imdim = size(image);
 image2d= squeeze(image(5,:,:,:));

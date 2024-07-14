@@ -338,13 +338,13 @@ ylim([0 size(R(cc).I,1)])
 legend('Grid', 'Origin')
 set(gca, 'FontSize', 20)
 
-% for cc = 1:2
-%     clear Products_x
-% 
-%     plot_xtransects(Products, R(cc).I, R(cc).cameraParams.Intrinsics, R(cc).worldPose)
-%     set(legend, 'Location', 'eastoutside')
-%     pause(1)
-% end
+for cc = 1:2
+    clear Products_x
+ 
+    plot_xtransects(Products, R(cc).I, R(cc).cameraParams.Intrinsics, R(cc).worldPose)
+    set(legend, 'Location', 'eastoutside')
+    pause(1)
+end
 %%
 % for cc = 1:2
 %     plot_ytransects(Products, R(cc).I, R(cc).cameraParams.Intrinsics, R(cc).worldPose)
