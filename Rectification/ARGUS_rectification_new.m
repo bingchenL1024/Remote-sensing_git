@@ -1,6 +1,5 @@
 clear
-addpath(genpath('/Users/bingchenliu/Desktop/Oceanography/research/Remote_sensing_total'))
-addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing/Rectification'))
+%addpath(genpath('/Users/bingchenliu/Desktop/Oceanography/research/Remote_sensing_total'))
 addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing_code'))
 
 
