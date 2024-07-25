@@ -341,6 +341,7 @@ ylim([0 size(R(cc).I,1)])
 legend('Grid', 'Origin')
 set(gca, 'FontSize', 20)
 
+
 %%
 % for cc = 1:2
 %     clear Products_x
@@ -367,7 +368,7 @@ for dd = 1%:length(day_files)
     [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
     [Products.t] = deal(time);
     [Products.tide]=deal(mean(verified));
-for cc = 1%:2
+for cc = 1:2
     if isfield(Products, 'iP')
     Products = rmfield(Products, 'iP');
     end

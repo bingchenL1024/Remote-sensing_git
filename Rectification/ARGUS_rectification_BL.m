@@ -4,7 +4,7 @@ clear
 addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing'))
 addpath(genpath('/Users/bingchenliu/Desktop/Oceanography/research/Remote_sensing_total'))
 addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing/Rectification'))
-
+addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing_code'))
 %% ARGUS_automated_rectification toolbox
 %   1. Housekeeping
 %           Global Directory Selection: Asks the user to choose the root directory for UAV rectification.
@@ -277,8 +277,7 @@ clear answer
 %                             extrinsics, intrinsics, initial frame, input data, products
 %  ============================================================================
 [Products.tide]=deal(0);
-cc=1 %BL: why only cc=1, since below there is if cc == 2, potential bug 
-
+cc=1 %BL: why only cc=1, since below there is if cc == 2
 [xyz,~,~,~,~,~] = getCoords(Products(1));
 [y2,x2, ~] = ll_to_utm(Products(1).lat, Products(1).lon);
 
@@ -337,6 +336,20 @@ ylim([0 size(R(cc).I,1)])
 %scatter(iP_origin(1), iP_origin(2),50, 'g', 'filled')
 legend('Grid', 'Origin')
 set(gca, 'FontSize', 20)
+
+% cc2=2;
+% iP2 = round(world2img(xyz, pose2extr(R(cc2).worldPose), R(cc2).cameraParams.Intrinsics));
+% 
+% figure(2);clf
+% imshow(R(cc2).I)
+% hold on
+% title('Grid')
+% scatter(iP2(:,1), iP2(:,2), 25, 'filled')
+% xlim([0 size(R(cc2).I,2)])
+% ylim([0 size(R(cc2).I,1)])
+% %scatter(iP_origin(1), iP_origin(2),50, 'g', 'filled')
+% legend('Grid', 'Origin')
+% set(gca, 'FontSize', 20)
 
 % for cc = 1:2
 %     clear Products_x
