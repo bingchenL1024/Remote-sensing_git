@@ -169,7 +169,7 @@ switch answer
 
         save(fullfile(global_dir, ['processing_para/processing_run_' char(string(datetime('today')))]), '*_dir', 'day_files', 'user_email')
     case 'No'
-        save(fullfile(global_dir, ['processing_para/processing_run_' char(string(datetime('today')))]), '*_dir', 'day_files', 'camera_type')
+        save(fullfile(global_dir, ['processing_run_' char(string(datetime('today')))]), '*_dir', 'day_files', 'camera_type')
 
 end
 
@@ -371,7 +371,7 @@ for cc = 1:cam_num
 end
 %% =============== get Rectified Products. ==================================
 close all
-camind = input('what is the camera index ');
+
 for dd = 1:length(day_files)
     tic
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
@@ -445,7 +445,7 @@ for dd = 1:length(day_files)
         end
 
         images = imageDatastore(fullfile(day_files(dd).folder, day_files(dd).name));
-        eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')])
+        eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(cc), '''));')])
 
         for viewId = 1:length(images.Files)
             tic
