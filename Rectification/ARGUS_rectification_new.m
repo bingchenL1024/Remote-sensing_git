@@ -436,7 +436,9 @@ for dd = 1:length(day_files)
             Products(pp).localZ = Z;
         end
 
-        oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);
+        %oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);
+        %%original
+        oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
         disp(oname)
 
         for pp = 1:length(Products)
@@ -445,7 +447,9 @@ for dd = 1:length(day_files)
         end
 
         images = imageDatastore(fullfile(day_files(dd).folder, day_files(dd).name));
-        eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')])
+        eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(cc), '''));')]) % original
+
+        eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
 
         for viewId = 1:length(images.Files)
             tic
