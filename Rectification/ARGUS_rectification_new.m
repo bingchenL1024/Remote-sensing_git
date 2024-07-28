@@ -1,6 +1,6 @@
 clear
-%addpath(genpath('/Users/bingchenliu/Desktop/Oceanography/research/Remote_sensing_total'))
-addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing_code'))
+addpath(genpath('/Users/bingchenliu/Desktop/Oceanography/research/Remote_sensing_total'))
+addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git'))
 
 
 %% ARGUS_automated_rectification toolbox
@@ -196,10 +196,11 @@ switch input_answer
         [world_camera] = select_target_gcp;
         for cc = 1:cam_num
             clear image_fig image_gcp world_gcp worldPose
-            eval([strcat('R(cc).cameraParams = cameraParams_CAM', string(cc), ';')])
+            %eval([strcat('R(cc).cameraParams = cameraParams_CAM', string(cc), ';')])%BL modified
+            eval([strcat('R(cc).cameraParams = cameraParams', ';')])%BL modified
 
             sprintf('Load in Camera %i frame with GCPs visible.', cc)
-            [temp_file, temp_file_path] = uigetfile({'.png'; '.jpg', '.tiff'}, 'Camera Frame with GCP');
+            [temp_file, temp_file_path] = uigetfile('*.tif', 'Camera Frame with GCP');
              %[temp_file, temp_file_path] = uigetfile({'.tiff'}); %BL modified 
             R(cc).I = undistortImage(imread(fullfile(temp_file_path, temp_file)), R(cc).cameraParams);
             image_fig = figure(1);clf
@@ -207,7 +208,7 @@ switch input_answer
 
             [world_gcp] = select_target_gcp;
 
-            worldPose = estworldpose(image_gcp,world_gcp, R(cc).cameraParams.Intrinsics, 'MaxReprojectionError',5);
+            worldPose = estworldpose(image_gcp,world_gcp, R(cc).cameraParams.Intrinsics, 'MaxReprojectionError',10);
             %worldPose.Translation = world_camera(cc,:);
 
             R(cc).image_gcp = image_gcp;
@@ -225,7 +226,7 @@ switch input_answer
         end
 
         save_dir = uigetdir('.', 'Choose where you want to save worldPose file.');
-        save(fullfile(global_dir, 'CPG_Data', 'ARGUS2.mat'), 'R')
+        save(fullfile(save_dir, 'CPG_Data', 'ARGUS2.mat'), 'R')
         info = inputdlg({'Filename to be saved'});
         disp('Location where worldPose file to be saved.')
         temp_file_path = uigetdir(global_dir, 'worldPose file save location');
@@ -254,6 +255,7 @@ clear answer
 %                          Load in topography DEM
 %                           - Requires time, X, Y, Z data in world coordinates
 %  ==============================================================================
+dd = 1; %BL modified
 if ~exist('DEM', 'var')
     answer = questdlg('Do you want to use a topography DEM?', 'Topo DEM', 'Yes', 'No', 'Yes');
     switch answer
