@@ -7,25 +7,9 @@ cam2 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Process
 cam3 = load('/Volumes/SIO_CPG_8T/Fletcher/Processed_data/cam3_test/ARGUS2_Cam3_1702144862060_Products_run2.mat');
 
 t_inst = 1;
-image_cam1= cam1.Products.Irgb_2d;
-image_cam2= cam2.Products.Irgb_2d;
-image_cam3= cam3.Products.Irgb_2d;
-
-image2d_cam123= squeeze(image_cam1(t_inst,:,:,:))+squeeze(image_cam2(t_inst,:,:,:))+squeeze(image_cam3(t_inst,:,:,:));
-
-limx = cam1.Products.localX;
-limy = cam2.Products.localY;
-
+image2dcam1= squeeze(image_cam1(t,:,:,:));
 figure()
-imshow(image2d_cam123,'XData',limx(1,:),'YData',limy(:,1))
-set(gca,'YDir','normal')
-set(gca,'XDir','reverse')
-axis on 
-xlabel('Cross-shore Location (m)','FontSize',22)
-ylabel('Along-shore Location (m)','FontSize',22)
 
-plotCamera
-%% loop through to create a video
 
 for t = 1:100
 image_cam1= cam1.Products.Irgb_2d;

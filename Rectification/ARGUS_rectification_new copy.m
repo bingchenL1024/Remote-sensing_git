@@ -350,28 +350,28 @@ for cc = 1:cam_num
     scatter(iP(:,1), iP(:,2), 25,'r', 'filled')
     xlim([0 size(R(cc).I,2)])
     ylim([0 size(R(cc).I,1)])
-    plotCamera %BL modified 
+
     id=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2]))); %plot origin
     scatter(iP(id(1),1), iP(id(1),2),50, 'g', 'filled')
     legend('Grid', 'Origin')
     set(gca, 'FontSize', 20)
 end
 %% =============== x_transects. ==========================================
-% for cc = 1:cam_num
-%     clear Products_x
-%     plot_xtransects(Products, R(cc).I, R(cc).cameraParams.Intrinsics, R(cc).worldPose)
-%     set(legend, 'Location', 'eastoutside')
-%     pause(1)
-% end
+for cc = 1:cam_num
+    clear Products_x
+    plot_xtransects(Products, R(cc).I, R(cc).cameraParams.Intrinsics, R(cc).worldPose)
+    set(legend, 'Location', 'eastoutside')
+    pause(1)
+end
 %% =============== y_transects. ==========================================
-% for cc = 1:cam_num
-%     plot_ytransects(Products, R(cc).I, R(cc).cameraParams.Intrinsics, R(cc).worldPose)
-%     set(legend, 'Location', 'eastoutside')
-%     pause(1)
-% end
+for cc = 1:cam_num
+    plot_ytransects(Products, R(cc).I, R(cc).cameraParams.Intrinsics, R(cc).worldPose)
+    set(legend, 'Location', 'eastoutside')
+    pause(1)
+end
 %% =============== get Rectified Products. ==================================
 close all
-%camind = string(inputdlg('what is the camera index (for file name search and save) '));
+camind = string(inputdlg('what is the camera index (for file name search and save) '));
 for dd = 1:length(day_files)
     tic
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
@@ -436,19 +436,19 @@ for dd = 1:length(day_files)
             Products(pp).localZ = Z;
         end
 
-        oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);
+        %oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);
         %%original
-        %oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
+        oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
         disp(oname)
 
         for pp = 1:length(Products)
-            Products(pp).iP = round(world2img(Products(pp).xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics)); %BL: important
+            Products(pp).iP = round(world2img(Products(pp).xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
             %Products(pp).iP(id,:)=NaN;
         end
 
         images = imageDatastore(fullfile(day_files(dd).folder, day_files(dd).name));
-        eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(cc), '''));')]) % original
-        %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
+        %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(cc), '''));')]) % original
+        eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
 
         for viewId = 1:length(images.Files)
             tic
