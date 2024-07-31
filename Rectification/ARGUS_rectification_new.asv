@@ -373,12 +373,13 @@ end
 close all
 %camind = string(inputdlg('what is the camera index (for file name search and save) '));
 for dd = 1:length(day_files)
-    tic
+    
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
     time=datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
     [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
     [Products.t] = deal(time);
     [Products.tide]=deal(mean(verified));
+    
     for cc = 1:cam_num
         if isfield(Products, 'iP')
             Products = rmfield(Products, 'iP');
@@ -453,6 +454,8 @@ for dd = 1:length(day_files)
         for viewId = 1:length(images.Files)
             tic
             I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
+            toc
+            tic
             for pp = 1:length(Products)
                 clear Irgb_temp
                 for ii = 1:length(Products(pp).iP)
@@ -473,8 +476,9 @@ for dd = 1:length(day_files)
             toc
         end
         
+         
         save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products')),'Products', 'cam_num', '-v7.3')
-        toc
+        
          if contains(Products(1).type, 'Grid')
             IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
          end

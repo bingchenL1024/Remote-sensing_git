@@ -2,9 +2,14 @@
 % This code is used to explore camera rectifiation  
 clear
 close all 
-cam1 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/ARGUS2_Cam1_1702144862060_Products_July23.mat');
-cam2 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/ARGUS2_Cam2_1702144862060_Products_July23.mat');
-cam3 = load('/Volumes/SIO_CPG_8T/Fletcher/Processed_data/cam3_test/ARGUS2_Cam3_1702144862060_Products_run2.mat');
+% cam1 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/ARGUS2_Cam1_1702144862060_Products_July23.mat');
+% cam2 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/ARGUS2_Cam2_1702144862060_Products_July23.mat');
+% cam3 = load('/Volumes/SIO_CPG_8T/Fletcher/Processed_data/cam3_test/ARGUS2_Cam3_1702144862060_Products_run2.mat');
+
+cam1 = load('/Volumes/SIO_CPG_8T/Fletcher/BC_Images_cam12/Processed_data/ARGUS2_Cam1_1722272520344_Products.mat');
+cam2 = load('/Volumes/SIO_CPG_8T/Fletcher/BC_Images_cam12/Processed_data/ARGUS2_Cam2_1722272520344_Products.mat');
+cam3 = load('/Volumes/SIO_CPG_8T/Fletcher/BC_images_cam3/Processed_data/ARGUS2_Cam3_1722272520315_Products.mat');
+
 
 t_inst = 1;
 image_cam1= cam1.Products.Irgb_2d;
@@ -24,7 +29,6 @@ axis on
 xlabel('Cross-shore Location (m)','FontSize',22)
 ylabel('Along-shore Location (m)','FontSize',22)
 
-plotCamera
 %% loop through to create a video
 
 for t = 1:100
