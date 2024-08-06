@@ -416,8 +416,8 @@ toc
             Products(pp).iP = round(world2img(Products(pp).xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
             iP_u = reshape(Products(pp).iP(:,2), size(Products(pp).localX,1), size(Products(pp).localX,2));
             iP_v = reshape(Products(pp).iP(:,1), size(Products(pp).localX,1), size(Products(pp).localX,2));
-            iP_u(iP_u <= 0) = NaN; iP_u(iP_u >= size(I,1)) = NaN;
-            iP_v(iP_v <= 0) = NaN; iP_v(iP_v >= size(I,2)) = NaN;
+            iP_u(iP_u <= 0) = NaN; iP_u(iP_u >= size(R(1).I,1)) = NaN;   %BL modified
+            iP_v(iP_v <= 0) = NaN; iP_v(iP_v >= size(R(1).I,2)) = NaN;  %BL modified
             iP_u(isnan(iP_v)) = NaN; iP_v(isnan(iP_u)) = NaN;
             Products(pp).iP_u = iP_u;
             Products(pp).iP_v = iP_v;
