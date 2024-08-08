@@ -6,9 +6,18 @@ close all
 % cam2 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/ARGUS2_Cam2_1702144862060_Products_July23.mat');
 % cam3 = load('/Volumes/SIO_CPG_8T/Fletcher/Processed_data/cam3_test/ARGUS2_Cam3_1702144862060_Products_run2.mat');
 
-cam1 = load('/Volumes/SIO_CPG_8T/Fletcher/BC_Images_cam12/Processed_data/ARGUS2_Cam1_1722272520344_Products.mat');
-cam2 = load('/Volumes/SIO_CPG_8T/Fletcher/BC_Images_cam12/Processed_data/ARGUS2_Cam2_1722272520344_Products.mat');
-cam3 = load('/Volumes/SIO_CPG_8T/Fletcher/BC_images_cam3/Processed_data/ARGUS2_Cam3_1722272520315_Products.mat');
+% cam1 = load('/Volumes/SIO_CPG_8T/Fletcher/BC_Images_cam12/Processed_data/ARGUS2_Cam1_1722272520344_Products.mat');
+% cam2 = load('/Volumes/SIO_CPG_8T/Fletcher/BC_Images_cam12/Processed_data/ARGUS2_Cam2_1722272520344_Products.mat');
+% cam3 = load('/Volumes/SIO_CPG_8T/Fletcher/BC_images_cam3/Processed_data/ARGUS2_Cam3_1722272520315_Products.mat');
+
+cam1 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/BC_image/1100_900/ARGUS2_Cam1_1722272520344_Products.mat');
+cam2 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/BC_image/1100_900/ARGUS2_Cam2_1722272520344_Products.mat');
+cam3 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/BC_image/1100_900/ARGUS2_Cam3_1722272520315_Products.mat');
+
+
+% cam1 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/BC_image/600_400/ARGUS2_Cam1_1722272520344_Products.mat');
+% cam2 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/BC_image/600_400/ARGUS2_Cam2_1722272520344_Products.mat');
+% cam3 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/BC_image/600_400/ARGUS2_Cam3_1722272520315_Products.mat');
 
 
 t_inst = 1;
@@ -18,16 +27,29 @@ image_cam3= cam3.Products.Irgb_2d;
 
 image2d_cam123= squeeze(image_cam1(t_inst,:,:,:))+squeeze(image_cam2(t_inst,:,:,:))+squeeze(image_cam3(t_inst,:,:,:));
 
-limx = cam1.Products.localX;
-limy = cam2.Products.localY;
+limx_lon = cam1.Products.localX;
+limy_lat = cam1.Products.localY;
+
+limx = cam1.Products.Eastings;
+limy = cam1.Products.Northings;
+
 
 figure()
 imshow(image2d_cam123,'XData',limx(1,:),'YData',limy(:,1))
+set(gca,'YDir','normal')
+%set(gca,'XDir','reverse')
+axis on 
+xlabel('Easting (m)','FontSize',22)
+ylabel('Northing(m)','FontSize',22)
+
+figure()
+imshow(image2d_cam123,'XData',limx_lon(1,:),'YData',limy_lat(:,1))
 set(gca,'YDir','normal')
 set(gca,'XDir','reverse')
 axis on 
 xlabel('Cross-shore Location (m)','FontSize',22)
 ylabel('Along-shore Location (m)','FontSize',22)
+
 
 %% loop through to create a video
 
@@ -64,4 +86,4 @@ pause(0.5)
 end 
 
 %%
-%save('/Users/bingchenliu/Desktop/Oceanography/research/Remote_sensing_total/Rectification/calib_data/Product_Fletcher_gridonly_0p5res','Products','origin_grid')
+save('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/calib_data/Products/Product_Fletcher_gridonly_0p5res_1100_900','Products','origin_grid')

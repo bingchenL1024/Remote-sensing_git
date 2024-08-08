@@ -176,6 +176,7 @@ end
 %% =============== Get World Pose - do once otherwise load in data. ============
 disp('How many cameras are you processing?')
 cam_num = str2double(string(inputdlg('How many cameras?')));
+camind = string(inputdlg('what is the camera index (for file name search and save) '));
 disp('Have you processed a WorldPose for this camera?')
 input_answer = questdlg('Have you processed a WorldPose for this camera?','WorldPose', 'Yes - Load it', 'No - Create Now', 'Yes - Load it');
 switch input_answer
@@ -208,7 +209,7 @@ switch input_answer
 
             [world_gcp] = select_target_gcp;
 
-            worldPose = estworldpose(image_gcp,world_gcp, R(cc).cameraParams.Intrinsics, 'MaxReprojectionError',10);
+            worldPose = estworldpose(image_gcp,world_gcp, R(cc).cameraParams.Intrinsics, 'MaxReprojectionError',5);
             %worldPose.Translation = world_camera(cc,:);
 
             R(cc).image_gcp = image_gcp;
@@ -369,17 +370,20 @@ end
 %     set(legend, 'Location', 'eastoutside')
 %     pause(1)
 % end
+
 %% =============== get Rectified Products. ==================================
+
+
 close all
-camind = string(inputdlg('what is the camera index (for file name search and save) '));
+
 for dd = 1:length(day_files)
-    
+    tic
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
     time=datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
     [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
     [Products.t] = deal(time);
     [Products.tide]=deal(mean(verified));
-    
+    clear IrIndv
     for cc = 1:cam_num
         if isfield(Products, 'iP')
             Products = rmfield(Products, 'iP');
@@ -397,38 +401,7 @@ for dd = 1:length(day_files)
             end
             aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
 
-            % if cc == 1
-            %     id=[];
-            %     % behind camera
-            %     for ii = 1:length(aa)
-            %         if aa(ii,1) > 0 & aa(ii,2) < 0
-            %             id = [id ii];
-            %         end
-            %     end
-            %     % left of camera
-            %     for ii = 1:length(aa)
-            %         if aa(ii,1) < 0 & aa(ii,2) < 0
-            %             id = [id ii];
-            %         end
-            %     end
-            % 
-            % elseif cc == 2
-            %     id=[];
-            %     % behind camera
-            %     for ii = 1:length(aa)
-            %         if aa(ii,1) > 0 & aa(ii,2) > 0
-            %             id = [id ii];
-            %         end
-            %     end
-            % 
-            %     % right of camera
-            %     for ii = 1:length(aa)
-            %         if aa(ii,1) < 0 & aa(ii,2) > 0
-            %             id = [id ii];
-            %         end
-            %     end
-            % end
-
+          
             Products(pp).xyz = xyz;
             Products(pp).localX = localX;
             Products(pp).localY = localY;
@@ -437,37 +410,44 @@ for dd = 1:length(day_files)
             Products(pp).localZ = Z;
         end
 
-        %oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);
-        %%original
-        oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
+        oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);%original
+        %oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
         disp(oname)
-
+toc
         for pp = 1:length(Products)
-            Products(pp).iP = round(world2img(Products(pp).xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics)); %BL: important
+            Products(pp).iP = round(world2img(Products(pp).xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
+            iP_u = reshape(Products(pp).iP(:,2), size(Products(pp).localX,1), size(Products(pp).localX,2));
+            iP_v = reshape(Products(pp).iP(:,1), size(Products(pp).localX,1), size(Products(pp).localX,2));
+            iP_u(iP_u <= 0) = NaN; iP_u(iP_u >= size(R(1).I,1)) = NaN;   %BL modified
+            iP_v(iP_v <= 0) = NaN; iP_v(iP_v >= size(R(1).I,2)) = NaN;  %BL modified
+            iP_u(isnan(iP_v)) = NaN; iP_v(isnan(iP_u)) = NaN;
+            Products(pp).iP_u = iP_u;
+            Products(pp).iP_v = iP_v;
             %Products(pp).iP(id,:)=NaN;
         end
 
         images = imageDatastore(fullfile(day_files(dd).folder, day_files(dd).name));
-        %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(cc), '''));')]) % original
-        eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
+        eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(cc), '''));')])%original
+        %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
 
+toc
         for viewId = 1:length(images.Files)
             tic
             I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
-            toc
-            tic
             for pp = 1:length(Products)
                 clear Irgb_temp
-                for ii = 1:length(Products(pp).iP)
-                    if any(isnan(Products(pp).iP(ii,:))) || any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= size(I, [1 2]))
-                        Irgb_temp(ii, :) = uint8([0 0 0]);
-                    else
-                        Irgb_temp(ii, :) = I(Products(pp).iP(ii,2), Products(pp).iP(ii,1),:);
-                    end % if any(Products(pp).iP(ii,:) <= 0) || any(Products(pp).iP(ii,[2 1]) >= size(I))
-                end %  for ii = 1:length(Products(pp).iP)
 
+                [rows, cols, numChannels] = size(I);
+                Irgb_temp = repmat(uint8([0]), size(Products(pp).localX,1)*size(Products(pp).localX,2),numChannels);
+
+                for i = 1:numChannels
+                        channel = I(:,:,i);
+                        Irgb_temp(~isnan(iP_u),i) = channel(sub2ind([rows, cols], iP_u(~isnan(iP_u)), iP_v(~isnan(iP_u))));
+                end
+                Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
+            
                 if contains(Products(pp).type, 'Grid')
-                    Products(pp).Irgb_2d(viewId, :,:,:) = reshape(Irgb_temp, size(Products(pp).localX,1), size(Products(pp).localX,2), 3);
+                    Products(pp).Irgb_2d(viewId, :,:,:) = Irgb_temp;
                 else
                     Products(pp).Irgb_2d(viewId, :,:) = Irgb_temp;
                 end % if contains(Products(pp).type, 'Grid')
@@ -476,9 +456,8 @@ for dd = 1:length(day_files)
             toc
         end
         
-         
         save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products')),'Products', 'cam_num', '-v7.3')
-        
+        toc
          if contains(Products(1).type, 'Grid')
             IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
          end
@@ -499,174 +478,79 @@ for dd = 1:length(day_files)
         saveas(gcf, fullfile(data_dir, 'Processed_data', strcat('ARGUS_', day_files(dd).name, '_Grid.png')))
     end
         Products = rmfield(Products, 'iP');
+        Products = rmfield(Products, 'iP_u');
+        Products = rmfield(Products, 'iP_v');
 end % for dd = 1:length(day_files)
- %% =============== save timestacks. ======================================
-% save_timestacks_ARGUS
-% 
- %% =============== cBathy. ==============================================
-% 
-% close all
-% for  dd = 1 : length(day_files)
-%     clearvars -except dd *_dir user_email day_files
-%     cd(fullfile(day_files(dd).folder, day_files(dd).name))
-% 
-%     % repeat for each flight
-%     for cc = 1:2
-%         oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);
-%         disp(oname)
-% 
-%         load(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products.mat')), 'Products')
-%         assert(isa(Products, 'struct'), 'Error (run_cBathy): Products must be a stucture as defined in user_input_products.')
-%         assert((isfield(Products, 'type') && isfield(Products, 'frameRate')), 'Error (run_cBathy): Products must be a stucture as defined in user_input_products.')
-% 
-%         ids_grid = find(ismember(string({Products.type}), 'Grid'));
-%         for pp = ids_grid % repeat for all grids
-%             clear Xout Yout Zout Igray
-%             %% run cBathy 2.0
-%             for viewId = 1:size(Products(pp).Irgb_2d,1)
-%                 Igray(:,:,viewId) = im2gray(squeeze(Products(pp).Irgb_2d(viewId, :,:,:)));
-%             end
-%             % Remove Nans
-%             [r c tt]=size(Igray);
-%             for k=1:r
-%                 for j=1:c
-%                     bind =find(isnan(Igray(k,j,:))==1);
-%                     gind =find(isnan(Igray(k,j,:))==0);
-%                     Igray(k,j,bind)=nanmean(Igray(k,j,gind));
-%                 end
-%             end
-%             if Products(pp).angle < 180 % East Coast
-%                 Xout = Products(pp).localX;
-%                 Yout = Products(pp).localY;
-%             elseif Products(pp).angle >180 % West Coast
-%                 Xout=-(Products(pp).localX.*cosd(180)+Products(pp).localY.*sind(180));
-%                 Yout=-(Products(pp).localY.*cosd(180)-Products(pp).localX.*sind(180));
-%             end % if Products(pp).angle < 180 % East Coast
-%             Zout = Products(pp).localZ;
-% 
-%             %Demo Plot
-%             figure(1);clf
-%             subplot(121)
-%             pcolor(Products(pp).localX,Products(pp).localY,Igray(:,:,1))
-%             shading flat
-%             set(gca, 'XDir', 'reverse')
-%             title('Original localX/Y')
-%             subplot(122)
-%             pcolor(Xout,Yout, Igray(:,:,1))
-%             shading flat
-%             title('Rotated localX/Y - waves coming from east')
-% 
-%             [~,cutoff_0]=min(abs(Yout(:,1)-0));
-%             if cc == 1
-%                 Xout = Xout(cutoff_0:end,:);
-%                 Yout = Yout(cutoff_0:end,:);
-%                 Zout = Zout(cutoff_0:end,:);
-%                 Igray = Igray(cutoff_0:end,:,:);
-%             elseif cc == 2
-%                 Xout = Xout(1:cutoff_0,:);
-%                 Yout = Yout(1:cutoff_0,:);
-%                 Zout = Zout(1:cutoff_0,:);
-%                 Igray = Igray(1:cutoff_0,:,:);
-%             end
-% 
-%             xyz=[Xout(:) Yout(:) Zout(:)];
-% 
-%             m = size(Igray,1);
-%             n = size(Igray,2);
-%             tt = size(Igray,3);
-%             data=zeros(tt,m*n);
-% 
-%             [xindgrid,yindgrid]=meshgrid(1:n,1:m);
-%             rowIND=yindgrid(:);
-%             colIND=xindgrid(:);
-% 
-%             for i=1:length(rowIND(:))
-%                 data(:,i)=reshape(Igray(rowIND(i),colIND(i),:),tt,1);
-%             end
-% 
-%             %% Loading CIRN data
-%             clearvars -except dd *_dir user_email day_files cc pp ids_grid Products xyz data oname R
-% 
-%             % Fill in cam requirement
-%             cam=xyz.*0+1;
-% 
-%             % Get into Epoch time
-%             epoch=posixtime(Products(pp).t);
-%             %% cBathy Parameters
-%             % cBathyTideTorrey pulls from NOAA SIO tide gauge. If tide diccerent, use
-%             % diccerent function
-% 
-%             %%% Site-specific Inputs
-%             params.stationStr = oname;
-%             params.dxm = Products(pp).dx;%5;                    % analysis domain spacing in x
-%             params.dym = Products(pp).dy;%10;                    % analysis domain spacing in y
-%             params.xyMinMax = [min(xyz(:,1)) max(xyz(:,1)) min(xyz(:,2)) max(xyz(:,2))];   % min, max of x, then y
-%             % default to [] for cBathy to choose
-%             params.tideFunction = 'cBathyTideneutral';  % tide level function for evel
-% 
-%             %%%%%%%   Power user settings from here down   %%%%%%%
-%             params.MINDEPTH = 0.25;             % for initialization and final QC
-%             params.MAXDEPTH = 20;             % for initialization and final QC
-%             params.QTOL = 0.5;                  % reject skill below this in csm
-%             params.minLam = 12;                 % min normalized eigenvalue to proceed
-%             params.Lx = 25;%3*params.dxm;           % tomographic domain smoothing
-%             params.Ly = 50;%3*params.dym;           %
-%             params.kappa0 = 2;                  % increase in smoothing at outer xm
-%             params.DECIMATE = 1;                % decimate pixels to reduce work load.
-%             params.maxNPix = 80;                % max num pixels per tile (decimate excess)
-%             params.minValsForBathyEst = 4;
-% 
-%             % f-domain etc.
-%             params.fB = [1/18: 1/50: 1/4];		% frequencies for analysis (~40 dof)
-%             params.nKeep = 4;                   % number of frequencies to keep
-% 
-%             % debugging options
-%             params.debug.production = 0;
-%             params.debug.DOPLOTSTACKANDPHASEMAPS = 0;  % top level debug of phase
-%             params.debug.DOSHOWPROGRESS = 1;		  % show progress of tiles
-%             params.debug.DOPLOTPHASETILE = 0;		  % observed and EOF results per pt
-%             params.debug.TRANSECTX = 200;		  % for plotStacksAndPhaseMaps
-%             params.debug.TRANSECTY = 900;		  % for plotStacksAndPhaseMaps
-% 
-%             % default occshore wave angle.  For search seeds.
-%             params.occshoreRadCCWFromx = 0;
-%             params.nlinfit=1;
-%             %% Run Cbathy
-% 
-%             bathy.params = params;
-%             bathy.epoch  = num2str(epoch(1));
-%             bathy.sName  = oname;
-% 
-%             bathy = analyzeBathyCollect(xyz, epoch, (data), cam, bathy)
-%             figure
-%             bathy.params.debug.production=1;
-%             plotBathyCollect(bathy)
-%             sgtitle([oname])
-%             %%
-%             [Xo Yo]=meshgrid(bathy.xm,bathy.ym);
-% 
-%             if Products(pp).angle < 180 % East Coast
-% 
-%             elseif Products(pp).angle > 180 % West Coast
-%                 Xo=-(Xo.*cosd(180)+Yo.*sind(180));
-%                 Yo=-(Yo.*cosd(180)-Xo.*sind(180));
-%                 bathy.fCombined.h = fliplr(bathy.fCombined.h);
-%                 bathy.fCombined.hErr = fliplr(bathy.fCombined.hErr);
-%             end % if Products(pp).angle < 180 % East Coast
-% 
-%             bathy.coords.Xo = Xo; bathy.coords.Eout = Products(pp).Eastings;
-%             bathy.coords.Yo = Yo; bathy.coords.Nout = Products(pp).Northings;
-% 
-%             save(fullfile(odir, 'Processed_data', [oname '_cBathy']),'bathy', '-v7.3')
-% 
-%         end % for pp = ids_grid % repeat for all grids
-% 
-%         if exist('user_email', 'var')
-%             try
-%                 sendmail(user_email{2}, [oname '- Rectifying Products DONE'])
-%             end
-%         end % if exist('user_email', 'var')
-%     end %  for cc = 1 : length(flights)
-% end % for  dd = 1 : length(day_files)
-% close all
-% cd(global_dir)
+
+
+%% =============== PIV Prep ======================================
+ 
+
+
+dim_image = size(Products.Irgb_2d);
+t_1hz_max = floor(dim_image(1)/2);
+image_1hz = zeros(t_1hz_max,dim_image(2),dim_image(3)); %down sample to avoid foam 
+
+
+for t = 1:t_1hz_max
+    image_1hz(t,:,:) = rgb2gray(squeeze(Products.Irgb_2d(2*t,:,:,:)));
+end 
+
+
+% for t = 1:dim_image(1)
+%     imshow(squeeze(image_1hz(t,:,:)),[])
+%     drawnow
+%     pause(0.5)
+% end 
+
+%% =============== Apply PIV ======================================
+ 
+interrogationarea = 128;%64; % window size of first pass
+step = 64;%32; % step of first pass
+subpixfinder = 1; % 1 = 3point Gauss, 2 = 2D Gauss
+mask_inpt = []; %Mask, if needed, generate via: imagesc(image); [temp,Mask{1,1},Mask{1,2}]=roipoly;
+roi_inpt = []; %Region of interest: [x,y,width,height] in pixels
+passes = 4;%2  % 1-4 nr. of passes
+int2 = 64;%32 % second pass window size
+int3 = 32; % third pass window size
+int4 = 32; % fourth pass window size
+imdeform = '*linear'; % '*spline' is more accurate, but slower
+repeat = 0; % 0 or 1 : Repeat the correlation four times and multiply the correlation matrices.
+mask_auto = 0; % 0 or 1 : Disable Autocorrelation in the first pass.
+do_linear_correlation = 0; % 0 or 1 : Use circular correlation (0) or linear correlation (1).
+do_correlation_matrices = 0;  % 0 or 1 : Disable Autocorrelation in the first pass.
+repeat_last_pass = 0; % 0 or 1 : Repeat the last pass of a multipass analyis
+delta_diff_min = 0.025; % Repetitions of last pass will stop when the average difference to the previous pass is less than this number.
+
+%imdomain_x = ;
+imdomain_y = 1:495;
+imageA = squeeze(image_1hz(1,imdomain_y,:));
+imageB = squeeze(image_1hz(2,imdomain_y,:));
+
+[x_pixel,y_pixel,u_pixel,v_pixel,~,CC,~] = piv_FFTmulti(imageA,imageB,interrogationarea,step, ...
+    subpixfinder,mask_inpt,roi_inpt,passes,int2,int3,int4,imdeform,repeat,mask_auto,do_linear_correlation, ...
+    do_correlation_matrices,repeat_last_pass,delta_diff_min);
+
+%% =============== PIV Visualization ======================================
+figure()
+h1 = quiver(y_pixel,x_pixel,v_pixel,u_pixel,5,'b','LineWidth',1.5);
+axis ij
+%set(gca,'XDir','reverse')
+set(h1,'YDir','normal')
+
+
+figure()
+imshow(imageA,[])
+hold on 
+quiver(y_pixel,x_pixel,v_pixel,u_pixel,5,'b','LineWidth',1.5);
+set(gca,'XDir','reverse')
+set(gca,'YDir','normal')
+hold off 
+
+
+
+
+
+
+
+

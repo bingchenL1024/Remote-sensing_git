@@ -168,15 +168,16 @@ switch answer
         setpref('Internet', 'SMTP_Password', 'krrq pufl tqcp hjrw')
         sendmail(user_email{2}, 'CoastalLens test email', [user_email{1} ' is processing ARGUS data from ' {day_files.name} ''])
 
-        save(fullfile(global_dir, ['processing_run_' char(string(datetime('today')))]), '*_dir', 'day_files', 'user_email')
+        save(fullfile(global_dir, ['processing_para/processing_run_' char(string(datetime('today')))]), '*_dir', 'day_files', 'user_email')
     case 'No'
-        save(fullfile(global_dir, ['processing_run_' char(string(datetime('today')))]), '*_dir', 'day_files', 'camera_type')
+        save(fullfile(global_dir, ['processing_para/processing_run_' char(string(datetime('today')))]), '*_dir', 'day_files', 'camera_type')
 
 end
 
 %% =============== Get World Pose - do once otherwise load in data. ============
 disp('How many cameras are you processing?')
 cam_num = str2double(string(inputdlg('How many cameras?')));
+camind = string(inputdlg('what is the camera index (for file name search and save) '));
 disp('Have you processed a WorldPose for this camera?')
 input_answer = questdlg('Have you processed a WorldPose for this camera?','WorldPose', 'Yes - Load it', 'No - Create Now', 'Yes - Load it');
 switch input_answer
@@ -197,8 +198,8 @@ switch input_answer
         [world_camera] = select_target_gcp;
         for cc = 1:cam_num
             clear image_fig image_gcp world_gcp worldPose
-            eval([strcat('R(cc).cameraParams = cameraParams_CAM', string(cc), ';')])
-
+            %eval([strcat('R(cc).cameraParams = cameraParams_CAM', string(camind), ';')])
+            eval([strcat('R(cc).cameraParams = cameraParams;')]) % BL modified
             sprintf('Load in Camera %i frame with GCPs visible.', cc)
             [temp_file, temp_file_path] = uigetfile({'.png'; '.jpg', '.tiff'}, 'Camera Frame with GCP');
 
