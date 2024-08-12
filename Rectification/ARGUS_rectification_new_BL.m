@@ -392,7 +392,7 @@ end
 close all
 
 for dd = 1:length(day_files)
-    tic
+    %tic
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
     time=datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
     [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
@@ -428,7 +428,7 @@ for dd = 1:length(day_files)
         oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);%original
         %oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
         disp(oname)
-toc
+
         for pp = 1:length(Products)
             Products(pp).iP = round(world2img(Products(pp).xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
             iP_u = reshape(Products(pp).iP(:,2), size(Products(pp).localX,1), size(Products(pp).localX,2));
@@ -445,7 +445,7 @@ toc
         eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(cc), '''));')])%original
         %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
 
-toc
+%toc
         for viewId = 1:length(images.Files)
             tic
             I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
