@@ -74,7 +74,7 @@ geotiffwrite(outputFilename, imageData, R, 'CoordRefSysCode', utmEPSG);
 figure()
 image(limx(:),limy(:),image2d_cam123)
 hold on 
-scatter(MOPS.MOPS655_UTM(1,1), MOPS.MOPS655_UTM(1,2),500,'filled','r')
+scatter(MOPS.MOPS655_UTM(1,1),MOPS.MOPS655_UTM(1,2),500,'filled','r')
 axis on 
 hold off
 

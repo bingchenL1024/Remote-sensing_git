@@ -303,72 +303,75 @@ end
 %                           - Load in all required data -
 %                             extrinsics, intrinsics, initial frame, input data, products
 %  =====================================================================
-[Products.tide] = deal(0);
-for cc = 1:cam_num
 
-    [xyz,~,~,~,~,~] = getCoords(Products(1));
-    [y2,x2, ~] = ll_to_utm(Products(1).lat, Products(1).lon);
 
-    %aa=xyz-[x2 y2 0];
-    %id_origin=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2])));
-    %iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
-    %iP_origin = iP(id_origin);
-    clear aa iP
 
-    aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
-    % This is built in for Fletcher - might not be valid for other sites
-    if Products(1).angle > 180
-        if cc == 1
-            id=[];
-            % behind camera
-            for ii = 1:length(aa)
-                if aa(ii,1) > 0 & aa(ii,2) < 0
-                    id = [id ii];
-                end
-            end
-            % left of camera
-            for ii = 1:length(aa)
-                if aa(ii,1) < 0 & aa(ii,2) < 0
-                    id = [id ii];
-                end
-            end
-
-        elseif cc == 2
-            id=[];
-            % behind camera
-            for ii = 1:length(aa)
-                if aa(ii,1) > 0 & aa(ii,2) > 0
-                    id = [id ii];
-                end
-            end
-
-            % right of camera
-            for ii = 1:length(aa)
-                if aa(ii,1) < 0 & aa(ii,2) > 0
-                    id = [id ii];
-                end
-            end
-        end
-
-        xyz(id,:)=[];
-    end
-    aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
-
-    iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
-
-    figure(cc);clf
-    imshow(R(cc).I)
-    hold on
-    title('Grid')
-    scatter(iP(:,1), iP(:,2), 25,'r', 'filled')
-    xlim([0 size(R(cc).I,2)])
-    ylim([0 size(R(cc).I,1)])
-    plotCamera %BL modified 
-    id=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2]))); %plot origin
-    scatter(iP(id(1),1), iP(id(1),2),50, 'g', 'filled')
-    legend('Grid', 'Origin')
-    set(gca, 'FontSize', 20)
-end
+% [Products.tide] = deal(0);
+% for cc = 1:cam_num
+% 
+%     [xyz,~,~,~,~,~] = getCoords(Products(1));
+%     [y2,x2, ~] = ll_to_utm(Products(1).lat, Products(1).lon);
+% 
+%     %aa=xyz-[x2 y2 0];
+%     %id_origin=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2])));
+%     %iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
+%     %iP_origin = iP(id_origin);
+%     clear aa iP
+% 
+%     aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
+%     % This is built in for Fletcher - might not be valid for other sites
+%     if Products(1).angle > 180
+%         if cc == 1
+%             id=[];
+%             % behind camera
+%             for ii = 1:length(aa)
+%                 if aa(ii,1) > 0 & aa(ii,2) < 0
+%                     id = [id ii];
+%                 end
+%             end
+%             % left of camera
+%             for ii = 1:length(aa)
+%                 if aa(ii,1) < 0 & aa(ii,2) < 0
+%                     id = [id ii];
+%                 end
+%             end
+% 
+%         elseif cc == 2
+%             id=[];
+%             % behind camera
+%             for ii = 1:length(aa)
+%                 if aa(ii,1) > 0 & aa(ii,2) > 0
+%                     id = [id ii];
+%                 end
+%             end
+% 
+%             % right of camera
+%             for ii = 1:length(aa)
+%                 if aa(ii,1) < 0 & aa(ii,2) > 0
+%                     id = [id ii];
+%                 end
+%             end
+%         end
+% 
+%         xyz(id,:)=[];
+%     end
+%     aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
+% 
+%     iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
+% 
+%     figure(cc);clf
+%     imshow(R(cc).I)
+%     hold on
+%     title('Grid')
+%     scatter(iP(:,1), iP(:,2), 25,'r', 'filled')
+%     xlim([0 size(R(cc).I,2)])
+%     ylim([0 size(R(cc).I,1)])
+%     plotCamera %BL modified 
+%     id=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2]))); %plot origin
+%     scatter(iP(id(1),1), iP(id(1),2),50, 'g', 'filled')
+%     legend('Grid', 'Origin')
+%     set(gca, 'FontSize', 20)
+% end
 %% =============== x_transects. ==========================================
 % for cc = 1:cam_num
 %     clear Products_x
@@ -496,70 +499,70 @@ end % for dd = 1:length(day_files)
 
 
 %% =============== PIV Prep ======================================
- 
-
-
-dim_image = size(Products.Irgb_2d);
-t_1hz_max = floor(dim_image(1)/2);
-image_1hz = zeros(t_1hz_max,dim_image(2),dim_image(3)); %down sample to avoid foam 
-
-
-for t = 1:t_1hz_max
-    image_1hz(t,:,:) = rgb2gray(squeeze(Products.Irgb_2d(2*t,:,:,:)));
-end 
-
-
-% for t = 1:dim_image(1)
-%     imshow(squeeze(image_1hz(t,:,:)),[])
-%     drawnow
-%     pause(0.5)
+% 
+% 
+% 
+% dim_image = size(Products.Irgb_2d);
+% t_1hz_max = floor(dim_image(1)/2);
+% image_1hz = zeros(t_1hz_max,dim_image(2),dim_image(3)); %down sample to avoid foam 
+% 
+% 
+% for t = 1:t_1hz_max
+%     image_1hz(t,:,:) = rgb2gray(squeeze(Products.Irgb_2d(2*t,:,:,:)));
 % end 
-
-%% =============== Apply PIV ======================================
- 
-interrogationarea = 128;%64; % window size of first pass
-step = 64;%32; % step of first pass
-subpixfinder = 1; % 1 = 3point Gauss, 2 = 2D Gauss
-mask_inpt = []; %Mask, if needed, generate via: imagesc(image); [temp,Mask{1,1},Mask{1,2}]=roipoly;
-roi_inpt = []; %Region of interest: [x,y,width,height] in pixels
-passes = 4;%2  % 1-4 nr. of passes
-int2 = 64;%32 % second pass window size
-int3 = 32; % third pass window size
-int4 = 32; % fourth pass window size
-imdeform = '*linear'; % '*spline' is more accurate, but slower
-repeat = 0; % 0 or 1 : Repeat the correlation four times and multiply the correlation matrices.
-mask_auto = 0; % 0 or 1 : Disable Autocorrelation in the first pass.
-do_linear_correlation = 0; % 0 or 1 : Use circular correlation (0) or linear correlation (1).
-do_correlation_matrices = 0;  % 0 or 1 : Disable Autocorrelation in the first pass.
-repeat_last_pass = 0; % 0 or 1 : Repeat the last pass of a multipass analyis
-delta_diff_min = 0.025; % Repetitions of last pass will stop when the average difference to the previous pass is less than this number.
-
-%imdomain_x = ;
-imdomain_y = 1:495;
-imageA = squeeze(image_1hz(1,imdomain_y,:));
-imageB = squeeze(image_1hz(2,imdomain_y,:));
-
-[x_pixel,y_pixel,u_pixel,v_pixel,~,CC,~] = piv_FFTmulti(imageA,imageB,interrogationarea,step, ...
-    subpixfinder,mask_inpt,roi_inpt,passes,int2,int3,int4,imdeform,repeat,mask_auto,do_linear_correlation, ...
-    do_correlation_matrices,repeat_last_pass,delta_diff_min);
-
-%% =============== PIV Visualization ======================================
-figure()
-h1 = quiver(y_pixel,x_pixel,v_pixel,u_pixel,5,'b','LineWidth',1.5);
-axis ij
-%set(gca,'XDir','reverse')
-set(h1,'YDir','normal')
-
-
-figure()
-imshow(imageA,[])
-hold on 
-quiver(y_pixel,x_pixel,v_pixel,u_pixel,5,'b','LineWidth',1.5);
-set(gca,'XDir','reverse')
-set(gca,'YDir','normal')
-hold off 
-
-
+% 
+% 
+% % for t = 1:dim_image(1)
+% %     imshow(squeeze(image_1hz(t,:,:)),[])
+% %     drawnow
+% %     pause(0.5)
+% % end 
+% 
+% %% =============== Apply PIV ======================================
+% 
+% interrogationarea = 128;%64; % window size of first pass
+% step = 64;%32; % step of first pass
+% subpixfinder = 1; % 1 = 3point Gauss, 2 = 2D Gauss
+% mask_inpt = []; %Mask, if needed, generate via: imagesc(image); [temp,Mask{1,1},Mask{1,2}]=roipoly;
+% roi_inpt = []; %Region of interest: [x,y,width,height] in pixels
+% passes = 4;%2  % 1-4 nr. of passes
+% int2 = 64;%32 % second pass window size
+% int3 = 32; % third pass window size
+% int4 = 32; % fourth pass window size
+% imdeform = '*linear'; % '*spline' is more accurate, but slower
+% repeat = 0; % 0 or 1 : Repeat the correlation four times and multiply the correlation matrices.
+% mask_auto = 0; % 0 or 1 : Disable Autocorrelation in the first pass.
+% do_linear_correlation = 0; % 0 or 1 : Use circular correlation (0) or linear correlation (1).
+% do_correlation_matrices = 0;  % 0 or 1 : Disable Autocorrelation in the first pass.
+% repeat_last_pass = 0; % 0 or 1 : Repeat the last pass of a multipass analyis
+% delta_diff_min = 0.025; % Repetitions of last pass will stop when the average difference to the previous pass is less than this number.
+% 
+% %imdomain_x = ;
+% imdomain_y = 1:495;
+% imageA = squeeze(image_1hz(1,imdomain_y,:));
+% imageB = squeeze(image_1hz(2,imdomain_y,:));
+% 
+% [x_pixel,y_pixel,u_pixel,v_pixel,~,CC,~] = piv_FFTmulti(imageA,imageB,interrogationarea,step, ...
+%     subpixfinder,mask_inpt,roi_inpt,passes,int2,int3,int4,imdeform,repeat,mask_auto,do_linear_correlation, ...
+%     do_correlation_matrices,repeat_last_pass,delta_diff_min);
+% 
+% %% =============== PIV Visualization ======================================
+% figure()
+% h1 = quiver(y_pixel,x_pixel,v_pixel,u_pixel,5,'b','LineWidth',1.5);
+% axis ij
+% %set(gca,'XDir','reverse')
+% set(h1,'YDir','normal')
+% 
+% 
+% figure()
+% imshow(imageA,[])
+% hold on 
+% quiver(y_pixel,x_pixel,v_pixel,u_pixel,5,'b','LineWidth',1.5);
+% set(gca,'XDir','reverse')
+% set(gca,'YDir','normal')
+% hold off 
+% 
+% 
 
 
 
