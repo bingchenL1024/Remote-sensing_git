@@ -127,7 +127,7 @@ end
 data_dir = uigetdir('.', 'DATA Folder (all)');
 
 if ismac || isunix
-    disp('Choose SUB DATA Folder (select the SUBSET DATA you want to process)')
+    disp('DATA Folder (select the SUBSET DATA you want to process)')
 end
 
 data_dir_subset_path = uigetdir('.', 'DATA Folder (select the SUBSET DATA you want to process)');

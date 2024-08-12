@@ -72,7 +72,11 @@ geotiffwrite(outputFilename, imageData, R, 'CoordRefSysCode', utmEPSG);
 
 %% plot in UTM
 figure()
-image(limx(:),limy(:),image2d_cam123)
+image('XData',limx_lon(:,:),'YData',limy_lat(:,:),image2d_cam123)
+axis on
+set(gca,'YDir','normal')
+
+
 hold on 
 scatter(MOPS.MOPS655_UTM(1,1), MOPS.MOPS655_UTM(1,2),500,'filled','r')
 axis on 
