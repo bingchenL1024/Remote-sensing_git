@@ -2,7 +2,7 @@ clear
 addpath(genpath('/Users/bingchenliu/Desktop/Oceanography/research/Remote_sensing_total'))
 addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git'))
 
-
+%added Athina's optimization (look for 'channel' part)
 %% ARGUS_automated_rectification toolbox
 %   1. Housekeeping
 %           Global Directory Selection: Asks the user to choose the root directory for UAV rectification.
@@ -392,7 +392,7 @@ end
 close all
 
 for dd = 1:length(day_files)
-    %tic
+    tic
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
     time=datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
     [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
@@ -446,7 +446,7 @@ for dd = 1:length(day_files)
         %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
 
 %toc
-        for viewId = 1:length(images.Files)
+        for viewId = 1:length(images.Files) %loop through time --> 2400 frames in total
             tic
             I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
             for pp = 1:length(Products)

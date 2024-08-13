@@ -482,31 +482,6 @@ toc
 end % for dd = 1:length(day_files)
 
 
-%% =============== Apply PIV ======================================
-
-interrogationarea = 128;%64; % window size of first pass
-step = 64;%32; % step of first pass
-subpixfinder = 1; % 1 = 3point Gauss, 2 = 2D Gauss
-mask_inpt = []; %Mask, if needed, generate via: imagesc(image); [temp,Mask{1,1},Mask{1,2}]=roipoly;
-roi_inpt = []; %Region of interest: [x,y,width,height] in pixels
-passes = 4;%2  % 1-4 nr. of passes
-int2 = 64;%32 % second pass window size
-int3 = 32; % third pass window size
-int4 = 32; % fourth pass window size
-imdeform = '*linear'; % '*spline' is more accurate, but slower
-repeat = 0; % 0 or 1 : Repeat the correlation four times and multiply the correlation matrices.
-mask_auto = 0; % 0 or 1 : Disable Autocorrelation in the first pass.
-do_linear_correlation = 0; % 0 or 1 : Use circular correlation (0) or linear correlation (1).
-do_correlation_matrices = 0;  % 0 or 1 : Disable Autocorrelation in the first pass.
-repeat_last_pass = 0; % 0 or 1 : Repeat the last pass of a multipass analyis
-delta_diff_min = 0.025; % Repetitions of last pass will stop when the average difference to the previous pass is less than this number.
-
-
-
-[x_pixel,y_pixel,u_pixel,v_pixel,~,CC,~] = piv_FFTmulti(imageA,imageB,interrogationarea,step, ...
-    subpixfinder,mask_inpt,roi_inpt,passes,int2,int3,int4,imdeform,repeat,mask_auto,do_linear_correlation, ...
-    do_correlation_matrices,repeat_last_pass,delta_diff_min);
-
 %% =============== save timestacks. ======================================
 % save_timestacks_ARGUS
 
