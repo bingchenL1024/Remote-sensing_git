@@ -15,7 +15,7 @@ cam2 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Process
 cam3 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/BC_image/1100_900/ARGUS2_Cam3_1722272520315_Products.mat');
 
 % MOPS coordinate
-load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/Rectification/Toolbox/MopTableUTM.mat')
+load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/Toolbox/MopTableUTM.mat')
 
 % cam1 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/BC_image/600_400/ARGUS2_Cam1_1722272520344_Products.mat');
 % cam2 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/BC_image/600_400/ARGUS2_Cam2_1722272520344_Products.mat');
@@ -35,7 +35,10 @@ limy_lat = cam1.Products.localY;
 limx = cam1.Products.Eastings;
 limy = cam1.Products.Northings;
 
-
+MOPS.MOPS661_UTM  = [Mop.BackXutm(661) Mop.BackYutm(661); Mop.OffXutm(661) Mop.OffYutm(661)];
+MOPS.MOPS660_UTM  = [Mop.BackXutm(660) Mop.BackYutm(660); Mop.OffXutm(660) Mop.OffYutm(660)];
+MOPS.MOPS659_UTM  = [Mop.BackXutm(659) Mop.BackYutm(659); Mop.OffXutm(659) Mop.OffYutm(659)];
+MOPS.MOPS658_UTM  = [Mop.BackXutm(658) Mop.BackYutm(658); Mop.OffXutm(658) Mop.OffYutm(658)];
 MOPS.MOPS657_UTM  = [Mop.BackXutm(657) Mop.BackYutm(657); Mop.OffXutm(657) Mop.OffYutm(657)];
 MOPS.MOPS656_UTM  = [Mop.BackXutm(656) Mop.BackYutm(656); Mop.OffXutm(656) Mop.OffYutm(656)];
 MOPS.MOPS655_UTM  = [Mop.BackXutm(655) Mop.BackYutm(655); Mop.OffXutm(655) Mop.OffYutm(655)];
@@ -44,46 +47,72 @@ MOPS.MOPS653_UTM  = [Mop.BackXutm(653) Mop.BackYutm(653); Mop.OffXutm(653) Mop.O
 MOPS.MOPS652_UTM  = [Mop.BackXutm(652) Mop.BackYutm(652); Mop.OffXutm(652) Mop.OffYutm(652)];
 MOPS.MOPS651_UTM  = [Mop.BackXutm(651) Mop.BackYutm(651); Mop.OffXutm(651) Mop.OffYutm(651)];
 MOPS.MOPS650_UTM  = [Mop.BackXutm(650) Mop.BackYutm(650); Mop.OffXutm(650) Mop.OffYutm(650)];
+MOPS.MOPS649_UTM  = [Mop.BackXutm(649) Mop.BackYutm(649); Mop.OffXutm(649) Mop.OffYutm(649)];
+MOPS.MOPS648_UTM  = [Mop.BackXutm(648) Mop.BackYutm(648); Mop.OffXutm(648) Mop.OffYutm(648)];
+MOPS.MOPS647_UTM  = [Mop.BackXutm(647) Mop.BackYutm(647); Mop.OffXutm(647) Mop.OffYutm(647)];
 
 
 %% add geotiff
 
-E1 = limx(end,1);  % Easting of the upper-left corner
-N1 = limy(end,1); % Northing of the upper-left corner
-E2 = limx(1,end);  % Easting of the lower-right corner
-N2 = limy(1,end); % Northing of the lower-right corner
+% E1 = limx(end,1);  % Easting of the upper-left corner
+% N1 = limy(end,1); % Northing of the upper-left corner
+% E2 = limx(1,end);  % Easting of the lower-right corner
+% N2 = limy(1,end); % Northing of the lower-right corner
+% 
+% [imageHeight, imageWidth, ~] = size(image2d_cam123);
+% 
+% % Create a spatial reference object
+% R = georefcells([N1 N2], [E1 E2], [imageHeight, imageWidth]);
+% % Define the output GeoTIFF file name
+% outputFilename = 'output_geotiff.tif';
+% 
+% % Write the GeoTIFF
+% geotiffwrite(outputFilename, image2d_cam123, R);
+% 
+% % Optional: Define the coordinate system using the EPSG code for UTM
+% info = geotiffinfo(outputFilename);
+% proj = geotiffinfo(outputFilename);
+% utmZone = 11; % Replace with your UTM zone
+% utmEPSG = sprintf('EPSG:%d', 32600 + utmZone); % 326xx for northern hemisphere, 327xx for southern
+% geotiffwrite(outputFilename, imageData, R, 'CoordRefSysCode', utmEPSG);
 
-[imageHeight, imageWidth, ~] = size(image2d_cam123);
+numRows = 4001;
+numCols = 441;
 
-% Create a spatial reference object
-R = georefcells([N1 N2], [E1 E2], [imageHeight, imageWidth]);
-% Define the output GeoTIFF file name
-outputFilename = 'output_geotiff.tif';
+UTM_X_min = limx(end,1);
+UTM_Y_max = limy(end,1);
 
-% Write the GeoTIFF
-geotiffwrite(outputFilename, image2d_cam123, R);
+% Calculate the UTM coordinates of the bottom-right corner
+UTM_X_max = limx(1,end);
+UTM_Y_min = limy(1,end);
 
-% Optional: Define the coordinate system using the EPSG code for UTM
-info = geotiffinfo(outputFilename);
-proj = geotiffinfo(outputFilename);
-utmZone = 11; % Replace with your UTM zone
-utmEPSG = sprintf('EPSG:%d', 32600 + utmZone); % 326xx for northern hemisphere, 327xx for southern
-geotiffwrite(outputFilename, imageData, R, 'CoordRefSysCode', utmEPSG);
+% Create the spatial referencing object
+R = maprasterref('RasterSize', [numRows numCols], ...
+                 'XWorldLimits', [UTM_X_min UTM_X_max], ...
+                 'YWorldLimits', [UTM_Y_min UTM_Y_max], ...
+                 'ColumnsStartFrom', 'north');
 
+coordRefSysCode = 32611;
+geotiffwrite('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/figures/output.tif', image2d_cam123, R, 'CoordRefSysCode', coordRefSysCode);
+
+[data_read, R_read] = readgeoraster('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/figures/output.tif');
+mapshow(data_read,R_read)
 %% plot in UTM
 figure()
-image(limx(:),limy(:),image2d_cam123)
+pcolor(limx,limy, im2gray(image2d_cam123))
+shading flat
 hold on 
-scatter(MOPS.MOPS655_UTM(1,1),MOPS.MOPS655_UTM(1,2),500,'filled','r')
-axis on 
-hold off
-
-
-
-
+scatter(MOPS.MOPS655_UTM(1,1),MOPS.MOPS655_UTM(1,2),500,'r','filled')
+hold on 
+plot(MOPS.MOPS661_UTM(:,1), MOPS.MOPS661_UTM(:,2),'LineWidth',5)
+hold on 
+plot(MOPS.MOPS660_UTM(:,1), MOPS.MOPS660_UTM(:,2),'LineWidth',5)
+hold on 
+plot(MOPS.MOPS659_UTM(:,1), MOPS.MOPS659_UTM(:,2),'LineWidth',5)
+hold on 
+plot(MOPS.MOPS658_UTM(:,1), MOPS.MOPS658_UTM(:,2),'LineWidth',5)
+hold on 
 plot(MOPS.MOPS657_UTM(:,1), MOPS.MOPS657_UTM(:,2),'LineWidth',5)
-hold on 
-plot(MOPS.MOPS656_UTM(:,1), MOPS.MOPS656_UTM(:,2),'LineWidth',5)
 hold on 
 plot(MOPS.MOPS656_UTM(:,1), MOPS.MOPS656_UTM(:,2),'LineWidth',5)
 hold on 
@@ -98,14 +127,20 @@ hold on
 plot(MOPS.MOPS651_UTM(:,1), MOPS.MOPS651_UTM(:,2),'LineWidth',5)
 hold on 
 plot(MOPS.MOPS650_UTM(:,1), MOPS.MOPS650_UTM(:,2),'LineWidth',5)
-legend('MOP657','MOP656','MOP655','MOP654','MOP653','MOP652','MOP651','MOP650','FontSize',18)
-set(gca,'YDir','normal')
-%set(gca,'XDir','reverse')
+hold on 
+plot(MOPS.MOPS649_UTM(:,1), MOPS.MOPS649_UTM(:,2),'LineWidth',5)
+hold on 
+plot(MOPS.MOPS648_UTM(:,1), MOPS.MOPS648_UTM(:,2),'LineWidth',5)
+hold on 
+plot(MOPS.MOPS647_UTM(:,1), MOPS.MOPS647_UTM(:,2),'LineWidth',5)
+hold on 
+legend('','Origin(Local Coordinate)','MOP661','MOP660','MOP659','MOP658','MOP657','MOP656','MOP655','MOP654','MOP653','MOP652','MOP651','MOP650','MOP649','MOP648','MOP647','FontSize',18)
 axis on 
-xlabel('Easting (m)','FontSize',22)
-ylabel('Northing(m)','FontSize',22)
-hold off 
-
+hold off
+colormap('gray')
+ylabel('South \leftarrow Northings \rightarrow North')
+xlabel('West \leftarrow Eastings \rightarrow East')
+set(gca, 'FontSize', 20)
 %% plot in local coordinate
 
 figure()
@@ -152,4 +187,4 @@ pause(0.5)
 end 
 
 %%
-save('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/calib_data/Products/Product_Fletcher_gridonly_0p5res_1100_900','Products','origin_grid')
+%save('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/calib_data/Products/Product_Fletcher_gridonly_0p5res_1100_900','Products','origin_grid')

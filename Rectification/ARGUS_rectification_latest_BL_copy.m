@@ -3,6 +3,7 @@ addpath(genpath('/Users/bingchenliu/Desktop/Oceanography/research/Remote_sensing
 addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git'))
 
 %added Athina's optimization (look for 'channel' part)
+%copy of the above code (last update Aug 12)
 %% ARGUS_automated_rectification toolbox
 %   1. Housekeeping
 %           Global Directory Selection: Asks the user to choose the root directory for UAV rectification.
@@ -392,7 +393,7 @@ end
 close all
 
 for dd = 1:length(day_files)
-    tic
+    %tic
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
     time=datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
     [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
@@ -472,7 +473,7 @@ for dd = 1:length(day_files)
         end %=================loop through time --> 2400 frames in total
         
         save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products')),'Products', 'cam_num', '-v7.3')
-        toc
+        %toc
          if contains(Products(1).type, 'Grid')
             IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
          end
