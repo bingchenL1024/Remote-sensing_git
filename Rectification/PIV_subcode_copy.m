@@ -5,6 +5,7 @@
 
 %% =============== PIV Prep ======================================
  
+load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/0p1_resolution/Jan11_2024/ARGUS2_Cam1_1704999662100_Products_0.1mres_5s.mat')
 
 
 dim_image = size(Products.Irgb_2d);
