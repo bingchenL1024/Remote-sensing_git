@@ -425,7 +425,7 @@ for dd = 1:length(day_files)
             Products(pp).localZ = Z;
         end
 
-        oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);%original
+        oname = strcat(day_files(dd).name);%BL modified cam3
         %oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
         disp(oname)
 
@@ -442,7 +442,8 @@ for dd = 1:length(day_files)
         end
 
         images = imageDatastore(fullfile(day_files(dd).folder, day_files(dd).name));
-        eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(cc), '''));')])%original
+        %eval([strcat('images.Files = images.Files(contains(images.Files,
+        %''Cam', string(cc), '''));')])% no need for cam 3 
         %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
 
 %toc
