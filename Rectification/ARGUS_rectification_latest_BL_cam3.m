@@ -239,7 +239,7 @@ switch input_answer
         end
 
         save_dir = uigetdir('.', 'Choose where you want to save worldPose file.');
-        save(fullfile(save_dir, 'CPG_Data', 'ARGUS2.mat'), 'R')
+        save(fullfile(save_dir, 'CPG_Data', 'Fletcher_R.mat'), 'R')
         info = inputdlg({'Filename to be saved'});
         disp('Location where worldPose file to be saved.')
         temp_file_path = uigetdir(global_dir, 'worldPose file save location');
@@ -491,7 +491,7 @@ for dd = 1:length(day_files)
         xlabel('Cross-shore Distance (m)')
         ylabel('Along-shore Distance (m)')
         title({day_files(dd).name, strcat(string(time), ' UTC')})
-        saveas(gcf, fullfile(data_dir, 'Processed_data', strcat('ARGUS_', day_files(dd).name, '_Grid.png')))
+        saveas(gcf, fullfile(data_dir, 'Processed_data', strcat(day_files(dd).name, '_Grid.png')))
     end
         Products = rmfield(Products, 'iP');
         Products = rmfield(Products, 'iP_u');
