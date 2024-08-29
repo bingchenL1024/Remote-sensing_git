@@ -239,7 +239,7 @@ switch input_answer
         end
 
         save_dir = uigetdir('.', 'Choose where you want to save worldPose file.');
-        save(fullfile(save_dir, 'CPG_Data', 'Fletcher_R.mat'), 'R')
+        save(fullfile(save_dir, 'CPG_Data', 'ARGUS2.mat'), 'R')
         info = inputdlg({'Filename to be saved'});
         disp('Location where worldPose file to be saved.')
         temp_file_path = uigetdir(global_dir, 'worldPose file save location');
@@ -303,6 +303,9 @@ end
 %                           - Load in all required data -
 %                             extrinsics, intrinsics, initial frame, input data, products
 %  =====================================================================
+
+[timex_name,timex_path] = uigetfile('*.jpg','select timex image');
+timex = load((fullfile(timex_path, temp_file)));
 
 [Products.tide] = deal(0);
 for cc = 1:cam_num
@@ -392,7 +395,7 @@ close all
 for dd = 1:length(day_files)
     tic
     cd(fullfile(day_files(dd).folder, day_files(dd).name))
-    time=datetime(str2double(day_files(dd).name(10:end)), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC'); % BL modified for cam 3
+    time=datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
     [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
     [Products.t] = deal(time);
     [Products.tide]=deal(mean(verified));
@@ -423,7 +426,7 @@ for dd = 1:length(day_files)
             Products(pp).localZ = Z;
         end
 
-        oname = strcat(day_files(dd).name);%BL modified cam3
+        oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);%original
         %oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
         disp(oname)
 
@@ -440,8 +443,7 @@ for dd = 1:length(day_files)
         end
 
         images = imageDatastore(fullfile(day_files(dd).folder, day_files(dd).name));
-        %eval([strcat('images.Files = images.Files(contains(images.Files,
-        %''Cam', string(cc), '''));')])% no need for cam 3 
+        eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(cc), '''));')])%original
         %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
 
 %toc
@@ -489,7 +491,7 @@ for dd = 1:length(day_files)
         xlabel('Cross-shore Distance (m)')
         ylabel('Along-shore Distance (m)')
         title({day_files(dd).name, strcat(string(time), ' UTC')})
-        saveas(gcf, fullfile(data_dir, 'Processed_data', strcat(day_files(dd).name, '_Grid.png')))
+        saveas(gcf, fullfile(data_dir, 'Processed_data', strcat('ARGUS_', day_files(dd).name, '_Grid.png')))
     end
         Products = rmfield(Products, 'iP');
         Products = rmfield(Products, 'iP_u');

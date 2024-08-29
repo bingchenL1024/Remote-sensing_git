@@ -305,73 +305,77 @@ end
 %  =====================================================================
 
 
+[Products.tide] = deal(0);
+for cc = 1:cam_num
+    [timex_name,timex_path] = uigetfile('*.jpg','select timex image');
+    timex = undistortImage(imread((fullfile(timex_path, timex_name))),R(cc).cameraParams);
 
-% [Products.tide] = deal(0);
-% for cc = 1:cam_num
-% 
-%     [xyz,~,~,~,~,~] = getCoords(Products(1));
-%     [y2,x2, ~] = ll_to_utm(Products(1).lat, Products(1).lon);
-% 
-%     %aa=xyz-[x2 y2 0];
-%     %id_origin=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2])));
-%     %iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
-%     %iP_origin = iP(id_origin);
-%     clear aa iP
-% 
-%     aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
-%     % This is built in for Fletcher - might not be valid for other sites
-%     if Products(1).angle > 180
-%         if cc == 1
-%             id=[];
-%             % behind camera
-%             for ii = 1:length(aa)
-%                 if aa(ii,1) > 0 & aa(ii,2) < 0
-%                     id = [id ii];
-%                 end
-%             end
-%             % left of camera
-%             for ii = 1:length(aa)
-%                 if aa(ii,1) < 0 & aa(ii,2) < 0
-%                     id = [id ii];
-%                 end
-%             end
-% 
-%         elseif cc == 2
-%             id=[];
-%             % behind camera
-%             for ii = 1:length(aa)
-%                 if aa(ii,1) > 0 & aa(ii,2) > 0
-%                     id = [id ii];
-%                 end
-%             end
-% 
-%             % right of camera
-%             for ii = 1:length(aa)
-%                 if aa(ii,1) < 0 & aa(ii,2) > 0
-%                     id = [id ii];
-%                 end
-%             end
-%         end
-% 
-%         xyz(id,:)=[];
-%     end
-%     aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
-% 
-%     iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
-% 
-%     figure(cc);clf
-%     imshow(R(cc).I)
-%     hold on
-%     title('Grid')
-%     scatter(iP(:,1), iP(:,2), 25,'r', 'filled')
-%     xlim([0 size(R(cc).I,2)])
-%     ylim([0 size(R(cc).I,1)])
-%     plotCamera %BL modified 
-%     id=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2]))); %plot origin
-%     scatter(iP(id(1),1), iP(id(1),2),50, 'g', 'filled')
-%     legend('Grid', 'Origin')
-%     set(gca, 'FontSize', 20)
-% end
+    [xyz,~,~,~,~,~] = getCoords(Products(1));
+    [y2,x2, ~] = ll_to_utm(Products(1).lat, Products(1).lon);
+
+    %aa=xyz-[x2 y2 0];
+    %id_origin=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2])));
+    %iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
+    %iP_origin = iP(id_origin);
+    clear aa iP
+
+    aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
+    % This is built in for Fletcher - might not be valid for other sites
+    if Products(1).angle > 180
+        if cc == 1
+            id=[];
+            % behind camera
+            for ii = 1:length(aa)
+                if aa(ii,1) > 0 & aa(ii,2) < 0
+                    id = [id ii];
+                end
+            end
+            % left of camera
+            for ii = 1:length(aa)
+                if aa(ii,1) < 0 & aa(ii,2) < 0
+                    id = [id ii];
+                end
+            end
+
+        elseif cc == 2
+            id=[];
+            % behind camera
+            for ii = 1:length(aa)
+                if aa(ii,1) > 0 & aa(ii,2) > 0
+                    id = [id ii];
+                end
+            end
+
+            % right of camera
+            for ii = 1:length(aa)
+                if aa(ii,1) < 0 & aa(ii,2) > 0
+                    id = [id ii];
+                end
+            end
+        end
+
+        xyz(id,:)=[];
+    end
+    aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
+
+    iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
+
+    figure(cc);clf
+    imshow(timex)
+    hold on
+    title('Grid')
+    scatter(iP(:,1), iP(:,2), 25,'r', 'filled')
+    xlim([0 size(R(cc).I,2)])
+    ylim([0 size(R(cc).I,1)])
+    plotCamera %BL modified 
+    id=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2]))); %plot origin
+    scatter(iP(id(1),1), iP(id(1),2),50, 'g', 'filled')
+    legend('Grid', 'Origin')
+    set(gca, 'FontSize', 20)
+
+
+
+end
 %% =============== x_transects. ==========================================
 % for cc = 1:cam_num
 %     clear Products_x
