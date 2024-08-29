@@ -134,7 +134,7 @@ data_dir = uigetdir('.', 'DATA Folder (all)');
 % [~,data_dir_subset] = fileparts(data_dir_subset_path);
 
 % Load in all days that need to be processed.
-day_files = dir(data_dir); day_files([day_files.isdir]==1)=[]; day_files(contains({day_files.name}, '.DS'))=[];
+day_files = dir(data_dir); day_files([day_files.isdir]==0)=[]; day_files(contains({day_files.name}, '.DS'))=[];
 day_files(contains({day_files.name}, 'GCP'))=[]; day_files(contains({day_files.name}, 'Make_products'))=[];
 day_files(contains({day_files.name}, 'Processed_data'))=[];day_files(contains({day_files.name}, 'Products'))=[];
 
