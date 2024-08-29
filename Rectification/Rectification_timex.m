@@ -126,20 +126,20 @@ if ismac || isunix
 end
 data_dir = uigetdir('.', 'DATA Folder (all)');
 
-if ismac || isunix
-    disp('Choose SUB DATA Folder (select the SUBSET DATA you want to process)')
-end
+% if ismac || isunix
+%     disp('Choose SUB DATA Folder (select the SUBSET DATA you want to process)')
+% end
 
-data_dir_subset_path = uigetdir('.', 'DATA Folder (select the SUBSET DATA you want to process)');
-[~,data_dir_subset] = fileparts(data_dir_subset_path);
+% data_dir_subset_path = uigetdir('.', 'DATA Folder (select the SUBSET DATA you want to process)');
+% [~,data_dir_subset] = fileparts(data_dir_subset_path);
 
 % Load in all days that need to be processed.
-day_files = dir(data_dir); day_files([day_files.isdir]==0)=[]; day_files(contains({day_files.name}, '.'))=[];
+day_files = dir(data_dir); day_files([day_files.isdir]==1)=[]; day_files(contains({day_files.name}, '.DS'))=[];
 day_files(contains({day_files.name}, 'GCP'))=[]; day_files(contains({day_files.name}, 'Make_products'))=[];
 day_files(contains({day_files.name}, 'Processed_data'))=[];day_files(contains({day_files.name}, 'Products'))=[];
 
 % Filter the days corresponds to the SUBSET DATA 
-day_files(~contains({day_files.name}, data_dir_subset))=[];
+%day_files(~contains({day_files.name}, data_dir_subset))=[];
 
 %filter out other data days 
 
@@ -397,8 +397,8 @@ close all
 
 for dd = 1:length(day_files)
     tic
-    cd(fullfile(day_files(dd).folder, day_files(dd).name))
-    time=datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
+    %cd(fullfile(day_files(dd).folder, day_files(dd).name))
+    time=datetime(str2double(strcat(day_files(dd).name(1:10))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
     [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
     [Products.t] = deal(time);
     [Products.tide]=deal(mean(verified));
