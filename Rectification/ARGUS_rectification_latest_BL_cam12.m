@@ -485,6 +485,8 @@ for dd = 1:length(day_files) % select which folder to process
         for viewId = floor(length(images.Files)/3)+1:floor(length(images.Files)*2/3) %=================loop through time --> 2400 frames in total
             tic
             I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
+            toc
+            tic
             for pp = 1:length(Products)
                 clear Irgb_temp
 
@@ -498,9 +500,9 @@ for dd = 1:length(day_files) % select which folder to process
                 Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
             
                 if contains(Products(pp).type, 'Grid')
-                    Products(pp).Irgb_2d(viewId, :,:,:) = Irgb_temp;
+                    Products(pp).Irgb_2d(viewId-floor(length(images.Files)/3), :,:,:) = Irgb_temp;
                 else
-                    Products(pp).Irgb_2d(viewId, :,:) = Irgb_temp;
+                    Products(pp).Irgb_2d(viewId-floor(length(images.Files)/3), :,:) = Irgb_temp;
                 end % if contains(Products(pp).type, 'Grid')
 
             end
@@ -528,9 +530,9 @@ for dd = 1:length(day_files) % select which folder to process
                 Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
             
                 if contains(Products(pp).type, 'Grid')
-                    Products(pp).Irgb_2d(viewId, :,:,:) = Irgb_temp;
+                    Products(pp).Irgb_2d(viewId-floor(length(images.Files)*2/3), :,:,:) = Irgb_temp;
                 else
-                    Products(pp).Irgb_2d(viewId, :,:) = Irgb_temp;
+                    Products(pp).Irgb_2d(viewId-floor(length(images.Files)*2/3), :,:) = Irgb_temp;
                 end % if contains(Products(pp).type, 'Grid')
 
             end
