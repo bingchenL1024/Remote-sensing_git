@@ -572,115 +572,180 @@ end % for dd = 1:length(day_files)
 
     case 'No'
         close all
-        for dd = 1:length(day_files) % select which folder to process 
-            tic
-            cd(fullfile(day_files(dd).folder, day_files(dd).name))
-            time=datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
-            [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
-            [Products.t] = deal(time);
-            [Products.tide]=deal(mean(verified));
-            clear IrIndv
-            for cc = 1:cam_num
-                if isfield(Products, 'iP')
-                    Products = rmfield(Products, 'iP');
-                end
-        
-                if isfield(Products, 'Irgb_2d')
-                    Products = rmfield(Products, 'Irgb_2d');
-                end
-                for pp = 1 : length(Products)
-                    if exist('DEM', 'var')
-                        disp('Running with DEM.')
-                        [xyz, localX, localY, Z, Eastings, Northings] = getCoords_DEM(Products(pp), DEM);
-                    else
-                        [xyz, localX, localY, Z, Eastings, Northings] = getCoords(Products(pp));
-                    end
-                    aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
-        
-                  
-                    Products(pp).xyz = xyz;
-                    Products(pp).localX = localX;
-                    Products(pp).localY = localY;
-                    Products(pp).Eastings = Eastings;
-                    Products(pp).Northings = Northings;
-                    Products(pp).localZ = Z;
-                end
-        
-                oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);%original
-                %oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
-                disp(oname)
-        
-                for pp = 1:length(Products)
-                    Products(pp).iP = round(world2img(Products(pp).xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
-                    iP_u = reshape(Products(pp).iP(:,2), size(Products(pp).localX,1), size(Products(pp).localX,2));
-                    iP_v = reshape(Products(pp).iP(:,1), size(Products(pp).localX,1), size(Products(pp).localX,2));
-                    iP_u(iP_u <= 0) = NaN; iP_u(iP_u >= size(R(1).I,1)) = NaN;   %BL modified
-                    iP_v(iP_v <= 0) = NaN; iP_v(iP_v >= size(R(1).I,2)) = NaN;  %BL modified
-                    iP_u(isnan(iP_v)) = NaN; iP_v(isnan(iP_u)) = NaN;
-                    Products(pp).iP_u = iP_u;
-                    Products(pp).iP_v = iP_v;
-                    %Products(pp).iP(id,:)=NaN;
-                end
-        
-                images = imageDatastore(fullfile(day_files(dd).folder, day_files(dd).name));
-                eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(cc), '''));')])%original
-                %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
-        
-        %toc
-        
-                for viewId = 1:length(images.Files) %=================loop through time --> 2400 frames in total
-                    tic
-                    I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
-                    for pp = 1:length(Products)
-                        clear Irgb_temp
-        
-                        [rows, cols, numChannels] = size(I);
-                        Irgb_temp = repmat(uint8([0]), size(Products(pp).localX,1)*size(Products(pp).localX,2),numChannels);
-        
-                        for i = 1:numChannels
-                                channel = I(:,:,i);
-                                Irgb_temp(~isnan(iP_u),i) = channel(sub2ind([rows, cols], iP_u(~isnan(iP_u)), iP_v(~isnan(iP_u))));
-                        end
-                        Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
-                    
-                        if contains(Products(pp).type, 'Grid')
-                            Products(pp).Irgb_2d(viewId, :,:,:) = Irgb_temp;
-                        else
-                            Products(pp).Irgb_2d(viewId, :,:) = Irgb_temp;
-                        end % if contains(Products(pp).type, 'Grid')
-        
-                    end
-                    toc
-                end %=================loop through time --> 2400 frames in total
-                
-                save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products')),'Products', 'cam_num', '-v7.3')
-                toc
-         
-                 if contains(Products(1).type, 'Grid')
-                    IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
-                 end
-            end % for cc = 1 : 2 % Cam 1 or 2
-            
-            if sum(IrIndv(:)) ~= 0 % some color values present
-                [Ir] =cameraSeamBlend(IrIndv);
-                figure(1);clf
-                image(Products(1).localX(:), Products(1).localY(:), Ir)
-                axis equal
-                xlim([min(Products(1).xlim) max(Products(1).xlim)])
-                ylim([min(Products(1).ylim) max(Products(1).ylim)])
-                set(gca, 'FontSize', 16)
-                set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0.04, 0.5, 0.96]);
-                xlabel('Cross-shore Distance (m)')
-                ylabel('Along-shore Distance (m)')
-                title({day_files(dd).name, strcat(string(time), ' UTC')})
-                saveas(gcf, fullfile(data_dir, 'Processed_data', strcat('ARGUS_', day_files(dd).name, '_Grid.png')))
-            end
+    for dd = 1:length(day_files) % select which folder to process 
+        tic
+        cd(fullfile(day_files(dd).folder, day_files(dd).name))
+        time=datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
+        [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
+        [Products.t] = deal(time);
+        [Products.tide]=deal(mean(verified));
+        clear IrIndv
+        for cc = 1:cam_num
+            if isfield(Products, 'iP')
                 Products = rmfield(Products, 'iP');
-                Products = rmfield(Products, 'iP_u');
-                Products = rmfield(Products, 'iP_v');
-        end % for dd = 1:length(day_files)
+            end
+    
+            if isfield(Products, 'Irgb_2d')
+                Products = rmfield(Products, 'Irgb_2d');
+            end
+            for pp = 1 : length(Products)
+                if exist('DEM', 'var')
+                    disp('Running with DEM.')
+                    [xyz, localX, localY, Z, Eastings, Northings] = getCoords_DEM(Products(pp), DEM);
+                else
+                    [xyz, localX, localY, Z, Eastings, Northings] = getCoords(Products(pp));
+                end
+                aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
+    
+              
+                Products(pp).xyz = xyz;
+                Products(pp).localX = localX;
+                Products(pp).localY = localY;
+                Products(pp).Eastings = Eastings;
+                Products(pp).Northings = Northings;
+                Products(pp).localZ = Z;
+            end
+    
+            oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);%original
+            %oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
+            disp(oname)
+    
+            for pp = 1:length(Products)
+                Products(pp).iP = round(world2img(Products(pp).xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
+                iP_u = reshape(Products(pp).iP(:,2), size(Products(pp).localX,1), size(Products(pp).localX,2));
+                iP_v = reshape(Products(pp).iP(:,1), size(Products(pp).localX,1), size(Products(pp).localX,2));
+                iP_u(iP_u <= 0) = NaN; iP_u(iP_u >= size(R(1).I,1)) = NaN;   %BL modified
+                iP_v(iP_v <= 0) = NaN; iP_v(iP_v >= size(R(1).I,2)) = NaN;  %BL modified
+                iP_u(isnan(iP_v)) = NaN; iP_v(isnan(iP_u)) = NaN;
+                Products(pp).iP_u = iP_u;
+                Products(pp).iP_v = iP_v;
+                %Products(pp).iP(id,:)=NaN;
+            end
+    
+            images = imageDatastore(fullfile(day_files(dd).folder, day_files(dd).name));
+            eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(cc), '''));')])%original
+            %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
+    
+    %toc
+    %===================================================== part 1 begin
+    
+            for viewId = 1:floor(length(images.Files)/3) %=================loop through time --> 2400 frames in total
+                tic
+                I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
+                for pp = 1:length(Products)
+                    clear Irgb_temp
+    
+                    [rows, cols, numChannels] = size(I);
+                    Irgb_temp = repmat(uint8([0]), size(Products(pp).localX,1)*size(Products(pp).localX,2),numChannels);
+    
+                    for i = 1:numChannels
+                            channel = I(:,:,i);
+                            Irgb_temp(~isnan(iP_u),i) = channel(sub2ind([rows, cols], iP_u(~isnan(iP_u)), iP_v(~isnan(iP_u))));
+                    end
+                    Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
                 
-end 
+                    if contains(Products(pp).type, 'Grid')
+                        Products(pp).Irgb_2d(viewId, :,:,:) = Irgb_temp;
+                    else
+                        Products(pp).Irgb_2d(viewId, :,:) = Irgb_temp;
+                    end % if contains(Products(pp).type, 'Grid')
+    
+                end
+                toc
+            end %=================loop through time --> 2400 frames in total
+            
+            save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt1')),'Products', 'cam_num', '-v7.3')
+            toc
+            clear Products.Irgb_2d
+            disp('part 1 finished')
+    %===================================================== part 2 begin
+            for viewId = floor(length(images.Files)/3)+1:floor(length(images.Files)*2/3) %=================loop through time --> 2400 frames in total
+                tic
+                I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
+                toc
+                tic
+                for pp = 1:length(Products)
+                    clear Irgb_temp
+    
+                    [rows, cols, numChannels] = size(I);
+                    Irgb_temp = repmat(uint8([0]), size(Products(pp).localX,1)*size(Products(pp).localX,2),numChannels);
+    
+                    for i = 1:numChannels
+                            channel = I(:,:,i);
+                            Irgb_temp(~isnan(iP_u),i) = channel(sub2ind([rows, cols], iP_u(~isnan(iP_u)), iP_v(~isnan(iP_u))));
+                    end
+                    Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
+                
+                    if contains(Products(pp).type, 'Grid')
+                        Products(pp).Irgb_2d(viewId-floor(length(images.Files)/3), :,:,:) = Irgb_temp;
+                    else
+                        Products(pp).Irgb_2d(viewId-floor(length(images.Files)/3), :,:) = Irgb_temp;
+                    end % if contains(Products(pp).type, 'Grid')
+    
+                end
+                toc
+            end %=================loop through time --> 2400 frames in total
+            
+            save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt2')),'Products', 'cam_num', '-v7.3')
+            toc
+            clear Products.Irgb_2d
+            disp('part 2 finished')
+    %===================================================== part 3 begin
+            for viewId = floor(length(images.Files)*2/3)+1:length(images.Files) %=================loop through time --> 2400 frames in total
+                tic
+                I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
+                for pp = 1:length(Products)
+                    clear Irgb_temp
+    
+                    [rows, cols, numChannels] = size(I);
+                    Irgb_temp = repmat(uint8([0]), size(Products(pp).localX,1)*size(Products(pp).localX,2),numChannels);
+    
+                    for i = 1:numChannels
+                            channel = I(:,:,i);
+                            Irgb_temp(~isnan(iP_u),i) = channel(sub2ind([rows, cols], iP_u(~isnan(iP_u)), iP_v(~isnan(iP_u))));
+                    end
+                    Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
+                
+                    if contains(Products(pp).type, 'Grid')
+                        Products(pp).Irgb_2d(viewId-floor(length(images.Files)*2/3), :,:,:) = Irgb_temp;
+                    else
+                        Products(pp).Irgb_2d(viewId-floor(length(images.Files)*2/3), :,:) = Irgb_temp;
+                    end % if contains(Products(pp).type, 'Grid')
+    
+                end
+                toc
+            end %=================loop through time --> 2400 frames in total
+            
+            save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt3')),'Products', 'cam_num', '-v7.3')
+            toc
+            disp('part 3 finished')
+    % =================================================================== all 3
+    % parts finished
+             if contains(Products(1).type, 'Grid')
+                IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
+             end
+        end % for cc = 1 : 2 % Cam 1 or 2
+        
+        if sum(IrIndv(:)) ~= 0 % some color values present
+            [Ir] =cameraSeamBlend(IrIndv);
+            figure(1);clf
+            image(Products(1).localX(:), Products(1).localY(:), Ir)
+            axis equal
+            xlim([min(Products(1).xlim) max(Products(1).xlim)])
+            ylim([min(Products(1).ylim) max(Products(1).ylim)])
+            set(gca, 'FontSize', 16)
+            set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0.04, 0.5, 0.96]);
+            xlabel('Cross-shore Distance (m)')
+            ylabel('Along-shore Distance (m)')
+            title({day_files(dd).name, strcat(string(time), ' UTC')})
+            saveas(gcf, fullfile(data_dir, 'Processed_data', strcat('ARGUS_', day_files(dd).name, '_Grid.png')))
+        end
+            Products = rmfield(Products, 'iP');
+            Products = rmfield(Products, 'iP_u');
+            Products = rmfield(Products, 'iP_v');
+    end % for dd = 1:length(day_files)
+            
+
 %% =============== PIV Prep ======================================
 % 
 % 
