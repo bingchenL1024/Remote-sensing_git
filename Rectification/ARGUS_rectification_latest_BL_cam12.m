@@ -542,7 +542,8 @@ for dd = 1:length(day_files) % select which folder to process
         save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt3')),'Products', 'cam_num', '-v7.3')
         toc
         disp('part 3 finished')
-
+% =================================================================== all 3
+% parts finished
          if contains(Products(1).type, 'Grid')
             IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
          end

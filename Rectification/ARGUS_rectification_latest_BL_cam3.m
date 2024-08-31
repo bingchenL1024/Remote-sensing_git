@@ -188,7 +188,7 @@ end
 %% =============== Get World Pose - do once otherwise load in data. ============
 disp('How many cameras are you processing?')
 cam_num = str2double(string(inputdlg('How many cameras?')));
-camind = string(inputdlg('what is the camera index (for file name search and save) '));
+%camind = string(inputdlg('what is the camera index (for file name search and save) '));
 disp('Have you processed a WorldPose for this camera?')
 input_answer = questdlg('Have you processed a WorldPose for this camera?','WorldPose', 'Yes - Load it', 'No - Create Now', 'Yes - Load it');
 switch input_answer
@@ -303,73 +303,73 @@ end
 %                           - Load in all required data -
 %                             extrinsics, intrinsics, initial frame, input data, products
 %  =====================================================================
-
-[Products.tide] = deal(0);
-for cc = 1:cam_num
-
-    [xyz,~,~,~,~,~] = getCoords(Products(1));
-    [y2,x2, ~] = ll_to_utm(Products(1).lat, Products(1).lon);
-
-    %aa=xyz-[x2 y2 0];
-    %id_origin=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2])));
-    %iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
-    %iP_origin = iP(id_origin);
-    clear aa iP
-
-    aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
-    % This is built in for Fletcher - might not be valid for other sites
-    if Products(1).angle > 180
-        if cc == 1
-            id=[];
-            % behind camera
-            for ii = 1:length(aa)
-                if aa(ii,1) > 0 & aa(ii,2) < 0
-                    id = [id ii];
-                end
-            end
-            % left of camera
-            for ii = 1:length(aa)
-                if aa(ii,1) < 0 & aa(ii,2) < 0
-                    id = [id ii];
-                end
-            end
-
-        elseif cc == 2
-            id=[];
-            % behind camera
-            for ii = 1:length(aa)
-                if aa(ii,1) > 0 & aa(ii,2) > 0
-                    id = [id ii];
-                end
-            end
-
-            % right of camera
-            for ii = 1:length(aa)
-                if aa(ii,1) < 0 & aa(ii,2) > 0
-                    id = [id ii];
-                end
-            end
-        end
-
-        xyz(id,:)=[];
-    end
-    aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
-
-    iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
-
-    figure(cc);clf
-    imshow(R(cc).I)
-    hold on
-    title('Grid')
-    scatter(iP(:,1), iP(:,2), 25,'r', 'filled')
-    xlim([0 size(R(cc).I,2)])
-    ylim([0 size(R(cc).I,1)])
-    plotCamera %BL modified 
-    id=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2]))); %plot origin
-    scatter(iP(id(1),1), iP(id(1),2),50, 'g', 'filled')
-    legend('Grid', 'Origin')
-    set(gca, 'FontSize', 20)
-end
+% 
+% [Products.tide] = deal(0);
+% for cc = 1:cam_num
+% 
+%     [xyz,~,~,~,~,~] = getCoords(Products(1));
+%     [y2,x2, ~] = ll_to_utm(Products(1).lat, Products(1).lon);
+% 
+%     %aa=xyz-[x2 y2 0];
+%     %id_origin=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2])));
+%     %iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
+%     %iP_origin = iP(id_origin);
+%     clear aa iP
+% 
+%     aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
+%     % This is built in for Fletcher - might not be valid for other sites
+%     if Products(1).angle > 180
+%         if cc == 1
+%             id=[];
+%             % behind camera
+%             for ii = 1:length(aa)
+%                 if aa(ii,1) > 0 & aa(ii,2) < 0
+%                     id = [id ii];
+%                 end
+%             end
+%             % left of camera
+%             for ii = 1:length(aa)
+%                 if aa(ii,1) < 0 & aa(ii,2) < 0
+%                     id = [id ii];
+%                 end
+%             end
+% 
+%         elseif cc == 2
+%             id=[];
+%             % behind camera
+%             for ii = 1:length(aa)
+%                 if aa(ii,1) > 0 & aa(ii,2) > 0
+%                     id = [id ii];
+%                 end
+%             end
+% 
+%             % right of camera
+%             for ii = 1:length(aa)
+%                 if aa(ii,1) < 0 & aa(ii,2) > 0
+%                     id = [id ii];
+%                 end
+%             end
+%         end
+% 
+%         xyz(id,:)=[];
+%     end
+%     aa=xyz-[R(cc).worldPose.Translation(1) R(cc).worldPose.Translation(2) 0];
+% 
+%     iP = round(world2img(xyz, pose2extr(R(cc).worldPose), R(cc).cameraParams.Intrinsics));
+% 
+%     figure(cc);clf
+%     imshow(R(cc).I)
+%     hold on
+%     title('Grid')
+%     scatter(iP(:,1), iP(:,2), 25,'r', 'filled')
+%     xlim([0 size(R(cc).I,2)])
+%     ylim([0 size(R(cc).I,1)])
+%     plotCamera %BL modified 
+%     id=find(min(abs(aa(:,[1 2])))==abs(aa(:,[1 2]))); %plot origin
+%     scatter(iP(id(1),1), iP(id(1),2),50, 'g', 'filled')
+%     legend('Grid', 'Origin')
+%     set(gca, 'FontSize', 20)
+% end
 %% =============== x_transects. ==========================================
 % for cc = 1:cam_num
 %     clear Products_x
@@ -445,7 +445,9 @@ for dd = 1:length(day_files)
         %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
 
 %toc
-        for viewId = 1:length(images.Files) %=================loop through time --> 2400 frames in total
+        %===================================================== part 1 begin
+
+        for viewId = 1:floor(length(images.Files)/3) %=================loop through time --> 2400 frames in total
             tic
             I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
             for pp = 1:length(Products)
@@ -470,8 +472,74 @@ for dd = 1:length(day_files)
             toc
         end %=================loop through time --> 2400 frames in total
         
-        save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products')),'Products', 'cam_num', '-v7.3')
+        save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt1')),'Products', 'cam_num', '-v7.3')
         toc
+        clear Products.Irgb_2d
+        disp('part 1 finished')
+%===================================================== part 2 begin
+        for viewId = floor(length(images.Files)/3)+1:floor(length(images.Files)*2/3) %=================loop through time --> 2400 frames in total
+            tic
+            I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
+            toc
+            tic
+            for pp = 1:length(Products)
+                clear Irgb_temp
+
+                [rows, cols, numChannels] = size(I);
+                Irgb_temp = repmat(uint8([0]), size(Products(pp).localX,1)*size(Products(pp).localX,2),numChannels);
+
+                for i = 1:numChannels
+                        channel = I(:,:,i);
+                        Irgb_temp(~isnan(iP_u),i) = channel(sub2ind([rows, cols], iP_u(~isnan(iP_u)), iP_v(~isnan(iP_u))));
+                end
+                Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
+            
+                if contains(Products(pp).type, 'Grid')
+                    Products(pp).Irgb_2d(viewId-floor(length(images.Files)/3), :,:,:) = Irgb_temp;
+                else
+                    Products(pp).Irgb_2d(viewId-floor(length(images.Files)/3), :,:) = Irgb_temp;
+                end % if contains(Products(pp).type, 'Grid')
+
+            end
+            toc
+        end %=================loop through time --> 2400 frames in total
+        
+        save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt2')),'Products', 'cam_num', '-v7.3')
+        toc
+        clear Products.Irgb_2d
+        disp('part 2 finished')
+%===================================================== part 3 begin
+        for viewId = floor(length(images.Files)*2/3)+1:length(images.Files) %=================loop through time --> 2400 frames in total
+            tic
+            I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
+            for pp = 1:length(Products)
+                clear Irgb_temp
+
+                [rows, cols, numChannels] = size(I);
+                Irgb_temp = repmat(uint8([0]), size(Products(pp).localX,1)*size(Products(pp).localX,2),numChannels);
+
+                for i = 1:numChannels
+                        channel = I(:,:,i);
+                        Irgb_temp(~isnan(iP_u),i) = channel(sub2ind([rows, cols], iP_u(~isnan(iP_u)), iP_v(~isnan(iP_u))));
+                end
+                Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
+            
+                if contains(Products(pp).type, 'Grid')
+                    Products(pp).Irgb_2d(viewId-floor(length(images.Files)*2/3), :,:,:) = Irgb_temp;
+                else
+                    Products(pp).Irgb_2d(viewId-floor(length(images.Files)*2/3), :,:) = Irgb_temp;
+                end % if contains(Products(pp).type, 'Grid')
+
+            end
+            toc
+        end %=================loop through time --> 2400 frames in total
+        
+        save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt3')),'Products', 'cam_num', '-v7.3')
+        toc
+        disp('part 3 finished')
+% =================================================================== all 3
+% parts finished
+
          if contains(Products(1).type, 'Grid')
             IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
          end
