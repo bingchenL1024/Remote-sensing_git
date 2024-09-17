@@ -2,6 +2,7 @@
 % This code process PIV and is a test case 
 % The final goal after testing is to incorporate into
 % "ARGUS_rectification_new_BL.m" 
+addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git'))
 
 %% initial input
 spa_res = 0.1; %m
@@ -16,15 +17,15 @@ test=load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/PIV_data/
 
 
 %% convert image to gray scale
-% load('/Volumes/SIO_CPG_8T/Fletcher/Jan11_bigwave_2min/Processed_data/ARGUS2_Cam1_1704999662100_Products.mat')
-% dim_image = size(Products.Irgb_2d);
-% t_downsamp_max = floor(dim_image(1)/downsamp_rate);
-% for t = 1:t_downsamp_max
-%     image_temp  = squeeze(Products.Irgb_2d(downsamp_rate*t,:,:,:));
-%     image_downsamp(t,:,:) = rgb2gray(image_temp);
-% 
-% end 
-% save('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/PIV_data/imgray_1hz','image_downsamp')
+load('/Volumes/SIO_CPG_8T/Fletcher/Jan11_bigwave_2min/Processed_data/ARGUS2_Cam1_1704999662100_Products.mat')
+dim_image = size(Products.Irgb_2d);
+t_downsamp_max = floor(dim_image(1)/downsamp_rate);
+for t = 1:t_downsamp_max
+    image_temp  = squeeze(Products.Irgb_2d(downsamp_rate*t,:,:,:));
+    image_downsamp(t,:,:) = rgb2gray(image_temp);
+
+end 
+save('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/PIV_data/imgray_1hz','image_downsamp')
 
 
 
