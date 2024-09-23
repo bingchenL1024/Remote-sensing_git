@@ -6,26 +6,26 @@ addpath(genpath('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git'))
 
 %% initial input
 spa_res = 0.1; %m
-temp_res = 0.5; %hz
+temp_res = 1; %hz
 downsamp_rate = 2*(1/temp_res); 
 
 %% =============== PIV Prep ======================================
 %load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/0p1_resolution/Jan11_2024/ARGUS2_Cam1_1704999662100_Products_0.1mres_5s.mat')
 %clearvars -except Products
-%load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/PIV_data/imgray_1hz.mat')
-test=load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/PIV_data/imgray_0p5hz.mat');
+load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/PIV_data/imgray_1hz.mat')
+%load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/PIV_data/imgray_0p5hz.mat');
 
 
 %% convert image to gray scale
-load('/Volumes/SIO_CPG_8T/Fletcher/Jan11_bigwave_2min/Processed_data/ARGUS2_Cam1_1704999662100_Products.mat')
-dim_image = size(Products.Irgb_2d);
-t_downsamp_max = floor(dim_image(1)/downsamp_rate);
-for t = 1:t_downsamp_max
-    image_temp  = squeeze(Products.Irgb_2d(downsamp_rate*t,:,:,:));
-    image_downsamp(t,:,:) = rgb2gray(image_temp);
-
-end 
-save('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/PIV_data/imgray_1hz','image_downsamp')
+% load('/Volumes/SIO_CPG_8T/Fletcher/Jan11_bigwave_2min/Processed_data/ARGUS2_Cam1_1704999662100_Products.mat')
+% dim_image = size(Products.Irgb_2d);
+% t_downsamp_max = floor(dim_image(1)/downsamp_rate);
+% for t = 1:t_downsamp_max
+%     image_temp  = squeeze(Products.Irgb_2d(downsamp_rate*t,:,:,:));
+%     image_downsamp(t,:,:) = rgb2gray(image_temp);
+% 
+% end 
+% save('/Volumes/SIO_CPG_8T/Data/Fletcher/Jan11_bigwave_2min/grayscale/imgray_1hz','image_downsamp')
 
 
 
@@ -83,6 +83,7 @@ end
 u_pixel_mean = squeeze(mean(u_pixel_tot,1,'omitnan'));
 v_pixel_mean = squeeze(mean(v_pixel_tot,1,'omitnan'));
 
+save('/Volumes/SIO_CPG_8T/Data/Fletcher/Jan11_bigwave_2min/Current/PIV_output','x_pixel','y_pixel','u_pixel_tot','v_pixel_tot','u_pixel_mean','v_pixel_mean')
  %% =============== PIV Visualization ======================================
 close all 
 dispres = 8;
@@ -167,6 +168,12 @@ ylabel('Along-shore location (10^{-1}m)','FontSize',24)
 set(gca,'YDir','normal')
 set(gca,'XDir','normal')
 hold off 
+%% Vorticity (taking the curl of the mean current field)
+
+[du_dx,du_dy]=gradient(u_pixel_mean);
+[dv_dx,dv_dy]=gradient(v_pixel_mean);
+vort = dv_dx-du_dy;
+
 
 
 

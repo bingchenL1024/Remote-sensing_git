@@ -453,26 +453,27 @@ for dd = 1:length(day_files) % select which folder to process
 
 %toc
 %===================================================== part 1 begin
+    Irgb_temp = repmat(uint8([0]), size(Products(pp).localX,1)*size(Products(pp).localX,2),numChannels);
 
         for viewId = 1:floor(length(images.Files)/3) %=================loop through time --> 2400 frames in total
             tic
             I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
             for pp = 1:length(Products)
-                clear Irgb_temp
-
+                % clear Irgb_temp
+                % Irgb_temp(:) = NaN;
                 [rows, cols, numChannels] = size(I);
-                Irgb_temp = repmat(uint8([0]), size(Products(pp).localX,1)*size(Products(pp).localX,2),numChannels);
+                %Irgb_temp = repmat(uint8([0]), size(Products(pp).localX,1)*size(Products(pp).localX,2),numChannels);
 
                 for i = 1:numChannels
                         channel = I(:,:,i);
                         Irgb_temp(~isnan(iP_u),i) = channel(sub2ind([rows, cols], iP_u(~isnan(iP_u)), iP_v(~isnan(iP_u))));
                 end
-                Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
+                Irgb_temp_img=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
             
                 if contains(Products(pp).type, 'Grid')
-                    Products(pp).Irgb_2d(viewId, :,:,:) = Irgb_temp;
+                    Products(pp).Irgb_2d(viewId, :,:,:) = Irgb_temp_img;
                 else
-                    Products(pp).Irgb_2d(viewId, :,:) = Irgb_temp;
+                    Products(pp).Irgb_2d(viewId, :,:) = Irgb_temp_img;
                 end % if contains(Products(pp).type, 'Grid')
 
             end
