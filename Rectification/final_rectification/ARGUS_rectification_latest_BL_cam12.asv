@@ -468,23 +468,23 @@ for ind_dataseg = 1:ind_dataseg_max
             %clear Products.Igray_2d
             Products = rmfield(Products,"Igray_2d");
         end 
-        disp(['part',num2str(ind_dataseg),' finished'])
+        disp('part',num2str(ind_dataseg),'finished')
 end 
 
 % Process last bit of the time series (less than seg_duration, thus not precessed in previous for loop)
 if length(images.Files) > ind_dataseg_max*seg_duration
-    [Products] = func_rectification_subdata(ind_dataseg_max*seg_duration+1:length(images.Files),images,Products,R,iP_u,iP_v,cc,include_gray);
+    [Products] = func_rectification_subdata((ind_dataseg-1)*seg_duration+1:length(images.Files),images,Products,R,iP_u,iP_v,cc,include_gray);
     
     
-    save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt',num2str(ind_dataseg_max+1))),'Products', 'cam_num', '-v7.3')
-    toc
-    %clear Products.Irgb_2d
-    Products = rmfield(Products,"Irgb_2d");
-    if strcmp(include_gray, 'Yes') 
-        %clear Products.Igray_2d
-        Products = rmfield(Products,"Igray_2d");
-    end 
-    disp(['part',num2str(ind_dataseg_max+1),'finished'])
+        save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt',num2str(ind_dataseg))),'Products', 'cam_num', '-v7.3')
+        toc
+        %clear Products.Irgb_2d
+        Products = rmfield(Products,"Irgb_2d");
+        if strcmp(include_gray, 'Yes') 
+            %clear Products.Igray_2d
+            Products = rmfield(Products,"Igray_2d");
+        end 
+        disp('part',num2str(ind_dataseg),'finished')
 end     
 % ============================================================================================= all parts finished
          
