@@ -392,7 +392,7 @@ end
 % end
 
 %% =============== get Rectified Products. ==================================
-include_gray= questdlg('Do you want to also include gray scale rectified image?', 'Yes', 'No');
+include_gray= questdlg('Do you want to convert rectified image to RGB?', 'Yes', 'No');
 answer = questdlg('Do you want divide the data set into subsets and process them separately (for grid product only)?', 'Yes', 'No');
 switch answer
     case 'Yes'
@@ -458,8 +458,6 @@ seg_duration = 600; % default segment duration is 5min (600=5*2*60)
 ind_dataseg_max= floor(length(images.Files)/seg_duration);       
 for ind_dataseg = 1:ind_dataseg_max 
         [Products] = func_rectification_subdata((ind_dataseg-1)*seg_duration+1:(ind_dataseg-1)*seg_duration+600,images,Products,R,iP_u,iP_v,cc,include_gray);
-    
-    
         save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt',num2str(ind_dataseg))),'Products', 'cam_num', '-v7.3')
         toc
         %clear Products.Irgb_2d
@@ -474,8 +472,6 @@ end
 % Process last bit of the time series (less than seg_duration, thus not precessed in previous for loop)
 if length(images.Files) > ind_dataseg_max*seg_duration
     [Products] = func_rectification_subdata(ind_dataseg_max*seg_duration+1:length(images.Files),images,Products,R,iP_u,iP_v,cc,include_gray);
-    
-    
     save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt',num2str(ind_dataseg_max+1))),'Products', 'cam_num', '-v7.3')
     toc
     %clear Products.Irgb_2d
