@@ -394,6 +394,12 @@ end
 %% =============== get Rectified Products. ==================================
 include_gray= questdlg('Do you want to convert rectified image to RGB?', 'Yes', 'No');
 answer = questdlg('Do you want divide the data set into subsets and process them separately (for grid product only)?', 'Yes', 'No');
+
+
+
+
+
+%=====================================================================================chunkify data
 switch answer
     case 'Yes'
 
@@ -453,7 +459,6 @@ for dd = 1:length(day_files) % select which folder to process
         %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
 
 %toc
-%===================================================== part 1 begin
 seg_duration = 600; % default segment duration is 5min (600=5*2*60)   
 ind_dataseg_max= floor(length(images.Files)/seg_duration);       
 for ind_dataseg = 1:ind_dataseg_max 
@@ -482,7 +487,6 @@ if length(images.Files) > ind_dataseg_max*seg_duration
     end 
     disp(['part',num2str(ind_dataseg_max+1),'finished'])
 end     
-% ============================================================================================= all parts finished
          
          if contains(Products(1).type, 'Grid') % make panaroma image for testing 
             IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
@@ -508,6 +512,8 @@ end
         Products = rmfield(Products, 'iP_v');
 end % for dd = 1:length(day_files)
 
+
+%===================================================================================== all together 
     case 'No'
         close all
         for dd = 1:length(day_files) % select which folder to process 
@@ -582,7 +588,12 @@ end % for dd = 1:length(day_files)
                         Irgb_temp=reshape(Irgb_temp, size(Products(pp).localX,1),size(Products(pp).localX,2),3);
                     
                         if contains(Products(pp).type, 'Grid')
-                            Products(pp).Irgb_2d(viewId, :,:,:) = Irgb_temp;
+                            if strcmp(include_gray, 'No') 
+                                Products(pp).Irgb_2d(viewId, :,:,:) = Irgb_temp;
+                            end
+                            if strcmp(include_gray, 'Yes') 
+                                Products(pp).Irgb_2d(viewId, :,:,:) = rgb2gray(Irgb_temp);
+                            end
                         else
                             Products(pp).Irgb_2d(viewId, :,:) = Irgb_temp;
                         end % if contains(Products(pp).type, 'Grid')
