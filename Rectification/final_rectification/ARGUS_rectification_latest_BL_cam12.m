@@ -392,7 +392,7 @@ end
 % end
 
 %% =============== get Rectified Products. ==================================
-include_gray= questdlg('Do you want to convert rectified image to RGB?', 'Yes', 'No');
+include_gray= questdlg('Do you want to convert rectified image to grayscale?', 'Yes', 'No');
 answer = questdlg('Do you want divide the data set into subsets and process them separately (for grid product only)?', 'Yes', 'No');
 
 
@@ -465,8 +465,9 @@ for ind_dataseg = 1:ind_dataseg_max
         [Products] = func_rectification_subdata((ind_dataseg-1)*seg_duration+1:(ind_dataseg-1)*seg_duration+600,images,Products,R,iP_u,iP_v,cc,include_gray);
         save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt',num2str(ind_dataseg))),'Products', 'cam_num', '-v7.3')
         toc
-        %clear Products.Irgb_2d
-        Products = rmfield(Products,"Irgb_2d");
+        if strcmp(include_gray, 'No')         
+            Products = rmfield(Products,"Irgb_2d");
+        end 
         if strcmp(include_gray, 'Yes') 
             %clear Products.Igray_2d
             Products = rmfield(Products,"Igray_2d");
@@ -480,10 +481,14 @@ if length(images.Files) > ind_dataseg_max*seg_duration
     save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt',num2str(ind_dataseg_max+1))),'Products', 'cam_num', '-v7.3')
     toc
     %clear Products.Irgb_2d
-    Products = rmfield(Products,"Irgb_2d");
-    if strcmp(include_gray, 'Yes') 
-        %clear Products.Igray_2d
-        Products = rmfield(Products,"Igray_2d");
+    if ind_dataseg~=ind_dataseg_max
+        if strcmp(include_gray, 'No')         
+            Products = rmfield(Products,"Irgb_2d");
+        end 
+        if strcmp(include_gray, 'Yes') 
+            %clear Products.Igray_2d
+            Products = rmfield(Products,"Igray_2d");
+        end 
     end 
     disp(['part',num2str(ind_dataseg_max+1),'finished'])
 end     

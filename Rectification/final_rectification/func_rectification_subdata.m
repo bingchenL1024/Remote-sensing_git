@@ -10,7 +10,7 @@ function [Products] = func_rectification_subdata(viewId_input,images,Products,R,
     Irgb_temp = repmat(uint8([0]), size(Products(1).localX,1)*size(Products(1).localX,2),numChannels);
 
         for viewId = viewId_input %=================loop through time --> 2400 frames in total
-            %tic
+            tic
             I = undistortImage(readimage(images, viewId), R(cc).cameraParams.Intrinsics);
             for pp = 1:length(Products)
                 % clear Irgb_temp
@@ -36,7 +36,7 @@ function [Products] = func_rectification_subdata(viewId_input,images,Products,R,
                 end % if contains(Products(pp).type, 'Grid')
 
             end
-            %toc
+            toc
         end %=================loop through time --> 2400 frames in total
         
 end 
