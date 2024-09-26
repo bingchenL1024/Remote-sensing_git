@@ -507,6 +507,8 @@ switch answer
     end % for dd = 1:length(day_files)
 
 %============================================================================together
+    case 'No'
+        tic
     for dd = 1:length(day_files)
         tic
         cd(fullfile(day_files(dd).folder, day_files(dd).name))
@@ -620,7 +622,7 @@ switch answer
                     Products = rmfield(Products, 'iP_u');
                     Products = rmfield(Products, 'iP_v');
     end % for dd = 1:length(day_files)
-
+toc 
 end 
 %% =============== PIV Prep ======================================
 % 
