@@ -31,7 +31,6 @@ function [Products] = func_rectification_subdata(viewId_input,images,Products,R,
                     if strcmp(include_gray, 'Yes') 
                         Products(pp).Igray_2d(viewId-viewId_input(1)+1, :,:) =rgb2gray(Irgb_temp_img);
                     end 
-                    Products.(pp).t_ind(viewId-viewId_input(1)+1) = viewID;
                 else
                     Products(pp).Irgb_2d(viewId-viewId_input(1)+1, :,:) = Irgb_temp_img;
                 end % if contains(Products(pp).type, 'Grid')

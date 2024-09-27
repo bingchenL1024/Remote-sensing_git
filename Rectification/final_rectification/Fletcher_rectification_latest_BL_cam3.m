@@ -187,7 +187,7 @@ end
 
 %% =============== Get World Pose - do once otherwise load in data. ============
 disp('How many cameras are you processing?')
-cam_num = str2double(string(inputdlg('How many cameras?')));
+cam_num = str2double(string(inputdlg('How many cameras(put 1 for Fletcher central cam)?')));
 %camind = string(inputdlg('what is the camera index (for file name search and save) '));
 disp('Have you processed a WorldPose for this camera?')
 input_answer = questdlg('Have you processed a WorldPose for this camera?','WorldPose', 'Yes - Load it', 'No - Create Now', 'Yes - Load it');
@@ -468,11 +468,12 @@ switch answer
     
     % Process last bit of the time series (less than seg_duration, thus not precessed in previous for loop)
         if length(images.Files) > ind_dataseg_max*seg_duration
+        %[Products] = func_rectification_subdata(ind_dataseg_max*seg_duration+1:1810,images,Products,R,iP_u,iP_v,cc,include_gray);
         [Products] = func_rectification_subdata(ind_dataseg_max*seg_duration+1:length(images.Files),images,Products,R,iP_u,iP_v,cc,include_gray);
         save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt',num2str(ind_dataseg_max+1))),'Products', 'cam_num', '-v7.3')
         toc
         %clear Products.Irgb_2d
-        if strcmp(include_gray, 'Yes') 
+        if strcmp(include_gray, 'No') 
             Products = rmfield(Products,"Irgb_2d");
         end 
         if strcmp(include_gray, 'Yes') 

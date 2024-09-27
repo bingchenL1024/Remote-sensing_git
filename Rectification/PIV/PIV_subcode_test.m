@@ -41,9 +41,12 @@ imdomain_x = 1:2000;
 imdomain_y = 4000:6000;
 
 for t =1:t_downsamp_max-1
-    imageA = squeeze(image_downsamp(t,imdomain_y,imdomain_x));
-    imageB = squeeze(image_downsamp(t+1,imdomain_y,imdomain_x));
-    
+    %imageA = squeeze(image_downsamp(t,imdomain_y,imdomain_x));
+    %imageB = squeeze(image_downsamp(t+1,imdomain_y,imdomain_x));
+
+    imageA = squeeze(image_downsamp(t,:,:));
+    imageB = squeeze(image_downsamp(t+1,:,:));
+
     % imageA = squeeze(image_downsamp(1,:,:));
     % imageB = squeeze(image_downsamp(2,:,:));
     % imagesc(imageA); [temp,Mask{1,1},Mask{1,2}]=roipoly;
