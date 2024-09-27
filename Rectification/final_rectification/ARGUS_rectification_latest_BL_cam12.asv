@@ -459,7 +459,7 @@ for dd = 1:length(day_files) % select which folder to process
         %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
 
 %toc
-seg_duration = 300; % default segment duration is 5min (600=5*2*60)   
+seg_duration = 600; % default segment duration is 5min (600=5*2*60)   
 ind_dataseg_max= floor(length(images.Files)/seg_duration);       
 for ind_dataseg = 1:ind_dataseg_max 
         [Products] = func_rectification_subdata((ind_dataseg-1)*seg_duration+1:(ind_dataseg-1)*seg_duration+seg_duration,images,Products,R,iP_u,iP_v,cc,include_gray);

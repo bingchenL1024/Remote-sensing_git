@@ -209,8 +209,12 @@ switch input_answer
         [world_camera] = select_target_gcp;
         for cc = 1:cam_num
             clear image_fig image_gcp world_gcp worldPose
-            %eval([strcat('R(cc).cameraParams = cameraParams_CAM', string(cc), ';')])%BL modified
-            eval([strcat('R(cc).cameraParams = cameraParams', ';')])%BL modified
+            switch cam_type
+                case 'Fletcher(in-house cam system)'
+                    eval([strcat('R(cc).cameraParams = cameraParams', ';')])%BL modified cam3
+                case 'ARGUS(cam1&2)'
+                    eval([strcat('R(cc).cameraParams = cameraParams_CAM',string(cc), ';')])%BL modified 
+            end 
 
             sprintf('Load in Camera %i frame with GCPs visible.', cc)
             [temp_file, temp_file_path] = uigetfile('*.tif', 'Camera Frame with GCP');
@@ -386,17 +390,23 @@ end
 
 %% =============== get Rectified Products. ==================================
 include_gray= questdlg('Do you want to convert rectified image to grayscale?', 'Yes', 'No');
-answer = questdlg('Do you want divide the data set into subsets and process them separately (for grid product only)?', 'Yes', 'No');
-
-
-switch answer
+divide_seg = questdlg('Do you want divide the data set into subsets and process them separately (for grid product only)?', 'Yes', 'No');
+subsamp_rate = str2double(string(inputdlg('Subsample image for every X images (put 1 if dont want to subsample)'))); %subsample
+cam_type = questdlg('Which camera is this?', 'ARGUS(cam1&2)', 'Fletcher(in-house cam system)');
+switch divide_seg
     case 'Yes'
     close all
 
     for dd = 1:length(day_files)
         tic
         cd(fullfile(day_files(dd).folder, day_files(dd).name))
-        time=datetime(str2double(day_files(dd).name(10:end)), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC'); % BL modified for cam 3
+        switch cam_type
+            case 'Fletcher(in-house cam system)'
+                time=datetime(str2double(day_files(dd).name(10:end)), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC'); % BL modified for cam 3
+            case 'ARGUS(cam1&2)'
+                time=datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
+        end 
+        
         [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
         [Products.t] = deal(time);
         [Products.tide]=deal(mean(verified));
@@ -426,9 +436,12 @@ switch answer
                 Products(pp).Northings = Northings;
                 Products(pp).localZ = Z;
             end
-    
-            oname = strcat(day_files(dd).name);%BL modified cam3
-            %oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
+            switch cam_type
+                case 'Fletcher(in-house cam system)'
+                    oname = strcat(day_files(dd).name);%BL modified cam3
+                case 'ARGUS(cam1&2)'
+                    oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
+            end 
             disp(oname)
     
             for pp = 1:length(Products)
@@ -444,15 +457,17 @@ switch answer
             end
     
             images = imageDatastore(fullfile(day_files(dd).folder, day_files(dd).name));
+            images.Files= images.Files(1:subsamp_rate:end); %subsample
             %eval([strcat('images.Files = images.Files(contains(images.Files,
             %''Cam', string(cc), '''));')])% no need for cam 3 
             %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
     
-            seg_duration = 600; % default segment duration is 5min (600=5*2*60)   
+            seg_duration = 300; % default segment duration is 5min (600=5*2*60)   %subsample
             ind_dataseg_max= floor(length(images.Files)/seg_duration);       
     for ind_dataseg = 1:ind_dataseg_max 
-            [Products] = func_rectification_subdata((ind_dataseg-1)*seg_duration+1:(ind_dataseg-1)*seg_duration+600,images,Products,R,iP_u,iP_v,cc,include_gray);
-            save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt',num2str(ind_dataseg))),'Products', 'cam_num', '-v7.3')
+            [Products] = func_rectification_subdata((ind_dataseg-1)*seg_duration+1:(ind_dataseg-1)*seg_duration+seg_duration,images,Products,R,iP_u,iP_v,cc,include_gray);
+            save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt',num2str(ind_dataseg), ...
+                'subrate_',num2str(subsamp_rate))),'Products', 'cam_num', '-v7.3')
             toc
             if ind_dataseg~=ind_dataseg_max
                 if strcmp(include_gray, 'No')         
@@ -470,7 +485,8 @@ switch answer
         if length(images.Files) > ind_dataseg_max*seg_duration
         %[Products] = func_rectification_subdata(ind_dataseg_max*seg_duration+1:1810,images,Products,R,iP_u,iP_v,cc,include_gray);
         [Products] = func_rectification_subdata(ind_dataseg_max*seg_duration+1:length(images.Files),images,Products,R,iP_u,iP_v,cc,include_gray);
-        save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt',num2str(ind_dataseg_max+1))),'Products', 'cam_num', '-v7.3')
+        save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt', ...
+            num2str(ind_dataseg_max+1),'subrate_',num2str(subsamp_rate))),'Products', 'cam_num', '-v7.3')
         toc
         %clear Products.Irgb_2d
         if strcmp(include_gray, 'No') 
@@ -513,7 +529,12 @@ switch answer
     for dd = 1:length(day_files)
         tic
         cd(fullfile(day_files(dd).folder, day_files(dd).name))
-        time=datetime(str2double(day_files(dd).name(10:end)), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC'); % BL modified for cam 3
+        switch cam_type
+            case 'Fletcher(in-house cam system)'
+                time=datetime(str2double(day_files(dd).name(10:end)), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC'); % BL modified for cam 3
+            case 'ARGUS(cam1&2)'
+                time=datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
+        end        
         [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
         [Products.t] = deal(time);
         [Products.tide]=deal(mean(verified));
@@ -544,8 +565,12 @@ switch answer
                 Products(pp).localZ = Z;
             end
     
-            oname = strcat(day_files(dd).name);%BL modified cam3
-            %oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
+            switch cam_type
+                case 'Fletcher(in-house cam system)'
+                    oname = strcat(day_files(dd).name);%BL modified cam3
+                case 'ARGUS(cam1&2)'
+                    oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
+            end 
             disp(oname)
     
             for pp = 1:length(Products)
@@ -561,6 +586,7 @@ switch answer
             end
     
             images = imageDatastore(fullfile(day_files(dd).folder, day_files(dd).name));
+            images.Files= images.Files(1:subsamp_rate:end); %subsample
             %eval([strcat('images.Files = images.Files(contains(images.Files,
             %''Cam', string(cc), '''));')])% no need for cam 3 
             %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
