@@ -391,8 +391,11 @@ end
 %% =============== get Rectified Products. ==================================
 include_gray= questdlg('Do you want to convert rectified image to grayscale?', 'Yes', 'No');
 divide_seg = questdlg('Do you want divide the data set into subsets and process them separately (for grid product only)?', 'Yes', 'No');
+seg_duration = str2double(string(inputdlg('segment length (in unit of frames) ;default is 300'))); %subsample
 subsamp_rate = str2double(string(inputdlg('Subsample image for every X images (put 1 if dont want to subsample)'))); %subsample
-cam_type = questdlg('Which camera is this?', 'ARGUS(cam1&2)', 'Fletcher(in-house cam system)');
+cam_type = questdlg('Which camera is this?', 'Camera Type','ARGUS(cam1&2)', 'Fletcher(in-house cam system)','Fletcher(in-house cam system)');
+include_PIV = questdlg('Do you want perform PIV calculation (note it will delete the rectification in the final Products)?', 'Yes', 'No');
+
 switch divide_seg
     case 'Yes'
     close all
@@ -440,7 +443,8 @@ switch divide_seg
                 case 'Fletcher(in-house cam system)'
                     oname = strcat(day_files(dd).name);%BL modified cam3
                 case 'ARGUS(cam1&2)'
-                    oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
+                    oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);%original
+                    %oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
             end 
             disp(oname)
     
@@ -458,16 +462,18 @@ switch divide_seg
     
             images = imageDatastore(fullfile(day_files(dd).folder, day_files(dd).name));
             images.Files= images.Files(1:subsamp_rate:end); %subsample
-            %eval([strcat('images.Files = images.Files(contains(images.Files,
-            %''Cam', string(cc), '''));')])% no need for cam 3 
+            switch cam_type 
+                case 'ARGUS(cam1&2)'
+                eval([strcat('images.Files = images.Files(contains(images.Files,''Cam', string(cc), '''));')])% no need for cam 3 
+            end 
             %eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(camind), '''));')]) %BL
     
-            seg_duration = 300; % default segment duration is 5min (600=5*2*60)   %subsample
+            %seg_duration = 300; % default segment duration is 5min (600=5*2*60)   %subsample
             ind_dataseg_max= floor(length(images.Files)/seg_duration);       
     for ind_dataseg = 1:ind_dataseg_max 
-            [Products] = func_rectification_subdata((ind_dataseg-1)*seg_duration+1:(ind_dataseg-1)*seg_duration+seg_duration,images,Products,R,iP_u,iP_v,cc,include_gray);
+            [Products] = func_rectification_subdata((ind_dataseg-1)*seg_duration+1:(ind_dataseg-1)*seg_duration+seg_duration,images,Products,R,iP_u,iP_v,cc,include_gray,include_PIV);
             save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt',num2str(ind_dataseg), ...
-                'subrate_',num2str(subsamp_rate))),'Products', 'cam_num', '-v7.3')
+                '_subrate_',num2str(subsamp_rate))),'Products', 'cam_num', '-v7.3')
             toc
             if ind_dataseg~=ind_dataseg_max
                 if strcmp(include_gray, 'No')         
@@ -482,26 +488,31 @@ switch divide_seg
     end 
     
     % Process last bit of the time series (less than seg_duration, thus not precessed in previous for loop)
-        if length(images.Files) > ind_dataseg_max*seg_duration
-        %[Products] = func_rectification_subdata(ind_dataseg_max*seg_duration+1:1810,images,Products,R,iP_u,iP_v,cc,include_gray);
-        [Products] = func_rectification_subdata(ind_dataseg_max*seg_duration+1:length(images.Files),images,Products,R,iP_u,iP_v,cc,include_gray);
-        save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt', ...
-            num2str(ind_dataseg_max+1),'subrate_',num2str(subsamp_rate))),'Products', 'cam_num', '-v7.3')
-        toc
-        %clear Products.Irgb_2d
-        if strcmp(include_gray, 'No') 
-            Products = rmfield(Products,"Irgb_2d");
-        end 
-        if strcmp(include_gray, 'Yes') 
-            %clear Products.Igray_2d
-            Products = rmfield(Products,"Igray_2d");
-        end 
-            disp(['part',num2str(ind_dataseg_max+1),'finished'])
+            if length(images.Files) > ind_dataseg_max*seg_duration
+                [Products] = func_rectification_subdata(ind_dataseg_max*seg_duration+1:length(images.Files),images,Products,R,iP_u,iP_v,cc,include_gray);
+                save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt', ...
+                    num2str(ind_dataseg_max+1),'_subrate_',num2str(subsamp_rate))),'Products', 'cam_num', '-v7.3')
+                toc
+                %clear Products.Irgb_2d
+                % if strcmp(include_gray, 'No') 
+                %     Products = rmfield(Products,"Irgb_2d");
+                % end 
+                % if strcmp(include_gray, 'Yes') 
+                %     %clear Products.Igray_2d
+                %     Products = rmfield(Products,"Igray_2d");
+                % end 
+                %     Products = rmfield(Products,"t_ind");
+                    disp(['part',num2str(ind_dataseg_max+1),'finished'])
             end     
              
-             if contains(Products(1).type, 'Grid') % make panaroma image for testing 
-                IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
-             end
+            if contains(Products(1).type, 'Grid') % make panaroma image for testing 
+                if strcmp(include_gray, 'No') 
+                    IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
+                end
+                if strcmp(include_gray, 'Yes') 
+                    IrIndv(:,:,:,cc) = squeeze(Products(1).Igray_2d(1,:,:,:));
+                end 
+            end
         end % for cc = 1 : 2 % Cam 1 or 2
         
         if sum(IrIndv(:)) ~= 0 % some color values present
@@ -523,13 +534,29 @@ switch divide_seg
             Products = rmfield(Products, 'iP_v');
     end % for dd = 1:length(day_files)
 
-%============================================================================together
+%=====================================================================================================together
+%=====================================================================================================together
+%=====================================================================================================together
+%=====================================================================================================together
+%=====================================================================================================together
+%=====================================================================================================together
+
+    
+    
+    
+    
+    
     case 'No'
         tic
     for dd = 1:length(day_files)
         tic
         cd(fullfile(day_files(dd).folder, day_files(dd).name))
-        time=datetime(str2double(day_files(dd).name(10:end)), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC'); % BL modified for cam 3
+        switch cam_type
+            case 'Fletcher(in-house cam system)'
+                time=datetime(str2double(day_files(dd).name(10:end)), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC'); % BL modified for cam 3
+            case 'ARGUS(cam1&2)'
+                time=datetime(str2double(strcat(day_files(dd).name(1:10), '.', day_files(dd).name(11:end))), 'ConvertFrom', 'posixtime', 'TimeZone', 'UTC');
+        end        
         [~,~,verified,~,~] = getNOAAtide(time, time+minutes(20),'9410230');
         [Products.t] = deal(time);
         [Products.tide]=deal(mean(verified));
@@ -564,7 +591,8 @@ switch divide_seg
                 case 'Fletcher(in-house cam system)'
                     oname = strcat(day_files(dd).name);%BL modified cam3
                 case 'ARGUS(cam1&2)'
-                    oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
+                    oname = strcat('ARGUS2_Cam', string(cc),'_', day_files(dd).name);%original
+                    %oname = strcat('ARGUS2_Cam', string(camind),'_', day_files(dd).name);%BL
             end 
             disp(oname)
     

@@ -5,7 +5,7 @@
 
 %viewId_input = 1:floor(length(images.Files)/3)
 
-function [Products] = func_rectification_subdata(viewId_input,images,Products,R,iP_u,iP_v,cc,include_gray)
+function [Products] = func_rectification_subdata(viewId_input,images,Products,R,iP_u,iP_v,cc,include_gray,include_PIV)
     [rows, cols, numChannels] = size(undistortImage(readimage(images, 1), R(cc).cameraParams.Intrinsics)); %assuming all images in the same 20 min collections are the same dim
     Irgb_temp = repmat(uint8([0]), size(Products(1).localX,1)*size(Products(1).localX,2),numChannels);
 
@@ -31,7 +31,7 @@ function [Products] = func_rectification_subdata(viewId_input,images,Products,R,
                     if strcmp(include_gray, 'Yes') 
                         Products(pp).Igray_2d(viewId-viewId_input(1)+1, :,:) =rgb2gray(Irgb_temp_img);
                     end 
-                    Products.(pp).t_ind(viewId-viewId_input(1)+1) = viewID;
+                    Products(pp).t_ind(viewId-viewId_input(1)+1) = viewId;
                 else
                     Products(pp).Irgb_2d(viewId-viewId_input(1)+1, :,:) = Irgb_temp_img;
                 end % if contains(Products(pp).type, 'Grid')
