@@ -53,7 +53,7 @@ for t =1:t_downsamp_max-1
     
     
     
-    interrogationarea = 128;%64; % window size of first pass
+    interrogationarea = 64;%64; % window size of first pass
     step = 64; % step of first pass
     subpixfinder = 1; % 1 = 3point Gauss, 2 = 2D Gauss
     mask_inpt = [];%[]; %Mask, if needed, generate via: imagesc(image); [temp,Mask{1,1},Mask{1,2}]=roipoly;

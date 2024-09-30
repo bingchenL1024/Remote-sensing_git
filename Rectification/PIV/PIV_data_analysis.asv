@@ -1,0 +1,18 @@
+% Bingchen Liu Sep 29, 2024
+% This code is used to process PIV output and run some test 
+
+PIV.cam1 =load('/Volumes/SIO_CPG_8T/Data/Fletcher/Aug18_1PM_2min/Processed_data/ARGUS2_Cam1_1724011261560_Products_pt1_subrate_4.mat');
+PIV.cam2 =load('/Volumes/SIO_CPG_8T/Data/Fletcher/Aug18_1PM_2min/Processed_data/ARGUS2_Cam2_1724011261560_Products_pt1_subrate_4.mat');
+PIV.cam3 =load('/Volumes/SIO_CPG_8T/Data/Fletcher/Aug18_1PM_2min/Processed_data/Fletcher_1724011320_Products_pt1_subrate_4.mat');
+
+
+u_mean.cam1 = squeeze(mean(PIV.cam1.Products.u_pixel_tot,1,'omitnan'));
+v_mean.cam1 = squeeze(mean(PIV.cam1.Products.v_pixel_tot,1,'omitnan'));
+u_mean.cam2 = squeeze(mean(PIV.cam1.Products.u_pixel_tot,1,'omitnan'));
+v_mean.cam2 = squeeze(mean(PIV.cam1.Products.v_pixel_tot,1,'omitnan'));
+u_mean.cam3 = squeeze(mean(PIV.cam1.Products.u_pixel_tot,1,'omitnan'));
+v_mean.cam3 = squeeze(mean(PIV.cam1.Products.v_pixel_tot,1,'omitnan'));
+%%
+dispres = 3;
+quiver(squeeze(Products_PIV.Products.x_pixel_tot(1,1:dispres:end,1:dispres:end)),squeeze(Products_PIV.Products.y_pixel_tot(1,1:dispres:end,1:dispres:end)), ...
+    u_pixel_mean(1:dispres:end,1:dispres:end),v_pixel_mean(1:dispres:end,1:dispres:end),3,'b','LineWidth',1.5);
