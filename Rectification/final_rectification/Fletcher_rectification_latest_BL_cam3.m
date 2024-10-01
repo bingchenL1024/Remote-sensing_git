@@ -505,30 +505,30 @@ switch divide_seg
                     disp(['part',num2str(ind_dataseg_max+1),'finished'])
             end     
              
-            if contains(Products(1).type, 'Grid') % make panaroma image for testing 
-                if strcmp(include_gray, 'No') 
-                    IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
-                end
-                if strcmp(include_gray, 'Yes') 
-                    IrIndv(:,:,:,cc) = squeeze(Products(1).Igray_2d(1,:,:,:));
-                end 
-            end
+            % if contains(Products(1).type, 'Grid') % make panaroma image for testing 
+            %     if strcmp(include_gray, 'No') 
+            %         IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
+            %     end
+            %     if strcmp(include_gray, 'Yes') 
+            %         IrIndv(:,:,:,cc) = squeeze(Products(1).Igray_2d(1,:,:,:));
+            %     end 
+            % end
         end % for cc = 1 : 2 % Cam 1 or 2
         
-        if sum(IrIndv(:)) ~= 0 % some color values present
-            [Ir] =cameraSeamBlend(IrIndv);
-            figure(1);clf
-            image(Products(1).localX(:), Products(1).localY(:), Ir)
-            axis equal
-            xlim([min(Products(1).xlim) max(Products(1).xlim)])
-            ylim([min(Products(1).ylim) max(Products(1).ylim)])
-            set(gca, 'FontSize', 16)
-            set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0.04, 0.5, 0.96]);
-            xlabel('Cross-shore Distance (m)')
-            ylabel('Along-shore Distance (m)')
-            title({day_files(dd).name, strcat(string(time), ' UTC')})
-            saveas(gcf, fullfile(data_dir, 'Processed_data', strcat('ARGUS_', day_files(dd).name, '_Grid.png')))
-        end
+        % if sum(IrIndv(:)) ~= 0 % some color values present
+        %     [Ir] =cameraSeamBlend(IrIndv);
+        %     figure(1);clf
+        %     image(Products(1).localX(:), Products(1).localY(:), Ir)
+        %     axis equal
+        %     xlim([min(Products(1).xlim) max(Products(1).xlim)])
+        %     ylim([min(Products(1).ylim) max(Products(1).ylim)])
+        %     set(gca, 'FontSize', 16)
+        %     set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0.04, 0.5, 0.96]);
+        %     xlabel('Cross-shore Distance (m)')
+        %     ylabel('Along-shore Distance (m)')
+        %     title({day_files(dd).name, strcat(string(time), ' UTC')})
+        %     saveas(gcf, fullfile(data_dir, 'Processed_data', strcat('ARGUS_', day_files(dd).name, '_Grid.png')))
+        % end
             Products = rmfield(Products, 'iP');
             Products = rmfield(Products, 'iP_u');
             Products = rmfield(Products, 'iP_v');
