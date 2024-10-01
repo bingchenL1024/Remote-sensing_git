@@ -42,7 +42,7 @@ function [Products] = func_rectification_subdata(viewId_input,images,Products,R,
                             passes = 4;%2  % 1-4 nr. of passes
                             int2 = 64;%32 % second pass window size
                             int3 = 32; % third pass window size
-                            int4 = 32; % fourth pass window size
+                            int4 = 16; % fourth pass window size
                             imdeform = '*linear'; % '*spline' is more accurate, but slower
                             repeat = 0; % 0 or 1 : Repeat the correlation four times and multiply the correlation matrices.
                             mask_auto = 0; % 0 or 1 : Disable Autocorrelation in the first pass.
@@ -67,7 +67,6 @@ function [Products] = func_rectification_subdata(viewId_input,images,Products,R,
                             im_PIV.B= [];
                         end % If this is the first frame or not 
                     end %=====================================================================================================perform PIV
-
                     Products(pp).t_ind(viewId-viewId_input(1)+1) = viewId;
                 else
                     Products(pp).Irgb_2d(viewId-viewId_input(1)+1, :,:) = Irgb_temp_img;
