@@ -389,12 +389,12 @@ end
 % end
 
 %% =============== get Rectified Products. ==================================
-include_gray= questdlg('Do you want to convert rectified image to grayscale?', 'Yes', 'No');
 divide_seg = questdlg('Do you want divide the data set into subsets and process them separately (for grid product only)? Note: can only further do PIV if select Yes', 'Yes', 'No');
 seg_duration = str2double(string(inputdlg('segment length (in unit of frames) ;default is 300'))); %subsample
 subsamp_rate = str2double(string(inputdlg('Subsample image for every X images (put 1 if dont want to subsample)'))); %subsample
 cam_type = questdlg('Which camera is this?', 'Camera Type','ARGUS(cam1&2)', 'Fletcher(in-house cam system)','Fletcher(in-house cam system)');
-include_PIV = questdlg('Do you want perform PIV calculation (note it will delete the rectification in the final Products)?', 'Yes', 'No');
+include_gray= questdlg('Do you want to convert rectified image to grayscale and perform PIV?', 'Yes', 'No');
+%include_PIV = questdlg('Do you want perform PIV calculation (note need to select Yes for divide seg and grayscale it will delete the rectification in the final Products)?', 'Yes', 'No');
 
 switch divide_seg
     case 'Yes'
@@ -471,17 +471,24 @@ switch divide_seg
             %seg_duration = 300; % default segment duration is 5min (600=5*2*60)   %subsample
             ind_dataseg_max= floor(length(images.Files)/seg_duration);       
     for ind_dataseg = 1:ind_dataseg_max 
-            [Products] = func_rectification_subdata((ind_dataseg-1)*seg_duration+1:(ind_dataseg-1)*seg_duration+seg_duration,images,Products,R,iP_u,iP_v,cc,include_gray,include_PIV);
+            [Products] = func_rectification_subdata((ind_dataseg-1)*seg_duration+1:(ind_dataseg-1)*seg_duration+seg_duration,images,Products,R,iP_u,iP_v,cc,include_gray);
             save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt',num2str(ind_dataseg), ...
                 '_subrate_',num2str(subsamp_rate))),'Products', 'cam_num', '-v7.3')
             toc
-            if ind_dataseg~=ind_dataseg_max
+            if isfield(Products, 'Irgb_2d') || isfield(Products, 'u_pixel_tot')
                 if strcmp(include_gray, 'No')         
                     Products = rmfield(Products,"Irgb_2d");
+                    Products = rmfield(Products,"t_ind");
+
                 end 
                 if strcmp(include_gray, 'Yes') 
-                    %clear Products.Igray_2d
-                    Products = rmfield(Products,"Igray_2d");
+                    %Products = rmfield(Products,"Igray_2d");
+                    Products = rmfield(Products,"x_pixel_tot");
+                    Products = rmfield(Products,"y_pixel_tot");
+                    Products = rmfield(Products,"u_pixel_tot");
+                    Products = rmfield(Products,"v_pixel_tot");
+                    Products = rmfield(Products,"CC_tot");
+                    Products = rmfield(Products,"t_ind");
                 end 
             end 
             disp(['part',num2str(ind_dataseg),' finished'])
@@ -489,7 +496,7 @@ switch divide_seg
     
     % Process last bit of the time series (less than seg_duration, thus not precessed in previous for loop)
             if length(images.Files) > ind_dataseg_max*seg_duration
-                [Products] = func_rectification_subdata(ind_dataseg_max*seg_duration+1:length(images.Files),images,Products,R,iP_u,iP_v,cc,include_gray,include_PIV);
+                [Products] = func_rectification_subdata(ind_dataseg_max*seg_duration+1:length(images.Files),images,Products,R,iP_u,iP_v,cc,include_gray);
                 save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products_pt', ...
                     num2str(ind_dataseg_max+1),'_subrate_',num2str(subsamp_rate))),'Products', 'cam_num', '-v7.3')
                 toc
@@ -501,11 +508,13 @@ switch divide_seg
                 %     %clear Products.Igray_2d
                 %     Products = rmfield(Products,"Igray_2d");
                 % end 
-                %     Products = rmfield(Products,"t_ind");
+                    
+                
+                %Products = rmfield(Products,"t_ind");
                     disp(['part',num2str(ind_dataseg_max+1),'finished'])
             end     
              
-            % if contains(Products(1).type, 'Grid') % make panaroma image for testing 
+            % if contains(Products(1).type, 'Grid')&&contains(include_gray,'No') % make panaroma image for testing 
             %     if strcmp(include_gray, 'No') 
             %         IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
             %     end
