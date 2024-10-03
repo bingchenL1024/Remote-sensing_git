@@ -34,6 +34,7 @@ function [Products] = func_rectification_subdata(viewId_input,images,Products,R,
                             im_PIV.A =  rgb2gray(Irgb_temp_img);
                         else  % if it's not the first frame --> do PIV 
                             im_PIV.B = rgb2gray(Irgb_temp_img);
+                            
                             interrogationarea = 128;%64; % window size of first pass
                             step = 64; % step of first pass
                             subpixfinder = 1; % 1 = 3point Gauss, 2 = 2D Gauss

@@ -1,5 +1,5 @@
 % Bingchen Liu July 15, 2024
-% This code is used to explore camera rectifiation  
+% This code is used to explore camera rectifiation and plot cam123 with MOP lines 
 clear
 close all 
 % cam1 = load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/Processed_data/ARGUS2_Cam1_1702144862060_Products_July23.mat');
