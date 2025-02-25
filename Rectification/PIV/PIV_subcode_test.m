@@ -39,7 +39,7 @@ load('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/PIV_data/imgra
 t_downsamp_max = size(image_downsamp,1);
 imdomain_x = 1:2000;
 imdomain_y = 4000:6000;
-
+%%
 for t =1:t_downsamp_max-1
     %imageA = squeeze(image_downsamp(t,imdomain_y,imdomain_x));
     %imageB = squeeze(image_downsamp(t+1,imdomain_y,imdomain_x));
@@ -89,8 +89,11 @@ v_pixel_mean = squeeze(mean(v_pixel_tot,1,'omitnan'));
 save('/Volumes/SIO_CPG_8T/Data/Fletcher/Jan11_bigwave_2min/Current/PIV_output','x_pixel','y_pixel','u_pixel_tot','v_pixel_tot','u_pixel_mean','v_pixel_mean')
  %% =============== PIV Visualization ======================================
 close all 
+load('/Volumes/SIO_CPG_8T/Data/Fletcher/Jan11_bigwave_2min/Current/PIV_output','x_pixel','y_pixel','u_pixel_tot','v_pixel_tot','u_pixel_mean','v_pixel_mean')
+load('/Volumes/SIO_CPG_8T/Data/Fletcher/Jan11_bigwave_2min/grayscale/imgray_1hz.mat')
+
 dispres = 8;
-dim_im = size(u_pixel);
+%dim_im = size(u_pixel);
 
 outputVideo = VideoWriter('/Users/bingchenliu/Documents/GitHub/Remote-sensing_git/data/figures/PIV_current.mp4','MPEG-4'); % Create a video file
 outputVideo.FrameRate = 1; % Set the frame rate

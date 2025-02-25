@@ -454,7 +454,7 @@ for dd = 1:length(day_files)
             case 'ARGUS(cam1&2)'
             eval([strcat('images.Files = images.Files(contains(images.Files, ''Cam', string(cc), '''));')])%original
             case 'Fletcher(in-house cam system)'
-            eval([strcat('images.Files = images.Files(contains(images.Files,''Fletcher''));')]) %BL
+            eval([strcat('images.Files = images.Files(contains(images.Files,''Fletcher' '''));')]) %BL
         end 
 %toc
         for viewId = 1:length(images.Files) %=================loop through time --> 2400 frames in total
@@ -482,7 +482,7 @@ for dd = 1:length(day_files)
             toc
         end %=================loop through time --> 2400 frames in total
         
-        save(fullfile(data_dir, 'Processed_data', strcat(oname, '_timex')),'Products', 'cam_num', '-v7.3')
+        save(fullfile(data_dir, 'Processed_data', strcat(oname, '_Products')),'Products', 'cam_num', '-v7.3')
         toc
          if contains(Products(1).type, 'Grid')
             IrIndv(:,:,:,cc) = squeeze(Products(1).Irgb_2d(1,:,:,:));
